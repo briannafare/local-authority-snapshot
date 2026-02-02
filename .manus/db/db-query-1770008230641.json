@@ -1,0 +1,16 @@
+{
+  "query": "SELECT id, businessName, websiteUrl, createdAt FROM audits ORDER BY createdAt DESC LIMIT 1;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user gvHM7L26eFEKLxd.root --database hmgSMMSSNJCN2iZZwVjazU --execute SELECT id, businessName, websiteUrl, createdAt FROM audits ORDER BY createdAt DESC LIMIT 1;",
+  "rows": [
+    {
+      "id": "30006",
+      "businessName": "the lindley team at mortgage express",
+      "websiteUrl": "https://www.thelindleyteam.com",
+      "createdAt": "2026-02-02 03:59:25"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tbusinessName\twebsiteUrl\tcreatedAt\n30006\tthe lindley team at mortgage express\thttps://www.thelindleyteam.com\t2026-02-02 03:59:25\n",
+  "stderr": "",
+  "execution_time_ms": 105
+}

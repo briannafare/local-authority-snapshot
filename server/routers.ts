@@ -33,15 +33,26 @@ export const appRouter = router({
         const audit = await getAuditById(input.auditId);
         if (!audit) throw new Error("Audit not found");
 
-        // Parse JSON fields
-        const gbpAudit = audit.gbpAuditResults ? JSON.parse(audit.gbpAuditResults) : {};
-        const seoAudit = audit.seoAuditResults ? JSON.parse(audit.seoAuditResults) : {};
-        const competitiveAnalysis = audit.competitiveResults ? JSON.parse(audit.competitiveResults) : {};
-        const aeoAnalysis = audit.aeoResults ? JSON.parse(audit.aeoResults) : {};
-        const leadCaptureAnalysis = audit.leadCaptureResults ? JSON.parse(audit.leadCaptureResults) : {};
-        const followUpAnalysis = audit.followUpResults ? JSON.parse(audit.followUpResults) : {};
-        const executiveSummary = audit.executiveSummary ? JSON.parse(audit.executiveSummary) : {};
-        const recommendations = audit.recommendations ? JSON.parse(audit.recommendations) : {};
+        // Safe JSON parsing helper
+        const safeJsonParse = (str: string | null, fallback: any = {}) => {
+          if (!str) return fallback;
+          try {
+            return JSON.parse(str);
+          } catch (error) {
+            console.error('JSON parse error:', error);
+            return fallback;
+          }
+        };
+
+        // Parse JSON fields safely
+        const gbpAudit = safeJsonParse(audit.gbpAuditResults);
+        const seoAudit = safeJsonParse(audit.seoAuditResults);
+        const competitiveAnalysis = safeJsonParse(audit.competitiveResults);
+        const aeoAnalysis = safeJsonParse(audit.aeoResults);
+        const leadCaptureAnalysis = safeJsonParse(audit.leadCaptureResults);
+        const followUpAnalysis = safeJsonParse(audit.followUpResults);
+        const executiveSummary = safeJsonParse(audit.executiveSummary);
+        const recommendations = safeJsonParse(audit.recommendations);
         
         // Get visual URLs from audit_visuals table
         const visualUrls = (audit as any).visuals?.map((v: any) => v.url) || [];

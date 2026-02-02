@@ -228,3 +228,27 @@
 - [ ] Check if report is fetching correct audit data
 - [ ] Ensure visuals array is populated
 - [ ] Test report rendering with sample data
+
+
+## 🔴 HIGHEST PRIORITY (User Feedback - Must Fix Now)
+
+### PRIORITY #1: REAL DATA COLLECTION (CRITICAL - MOST IMPORTANT)
+- [ ] Fix audit engine JSON storage - ensure LLM responses are valid JSON before saving
+- [ ] Test website crawler with eighty5labs.com - verify real title/meta/headings extracted
+- [ ] Test GBP scraper with real URL - verify actual ratings/reviews pulled
+- [ ] Fix ranking tracker to show real positions (not all "Not ranking")
+- [ ] Add comprehensive logging to see exactly what data is collected
+- [ ] Create NEW test audit to verify fixes work
+
+### PRIORITY #2: VISUAL CHARTS & DESIGN
+- [ ] Fix matplotlib chart generation - ensure charts actually display in report
+- [ ] Add score gauge visuals to report UI
+- [ ] Add comparison charts to report UI
+- [ ] Add heat maps to report UI
+- [ ] Redesign report with better visual hierarchy and professional styling
+- [ ] Make report look impressive and worthy of a lead magnet
+
+### PRIORITY #3: PDF EXPORT
+- [ ] Fix JSON parsing error in PDF generator
+- [ ] Ensure PDF includes all visual charts
+- [ ] Test PDF download end-to-end

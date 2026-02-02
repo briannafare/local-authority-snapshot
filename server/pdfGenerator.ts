@@ -320,7 +320,7 @@ ${p.tactics?.map((t: string) => `- ${t}`).join("\n") || ""}
 
 ### Implementation Roadmap
 
-${recommendedPlan.roadmap?.map((phase: any) => `
+${Array.isArray(recommendedPlan.roadmap) ? recommendedPlan.roadmap.map((phase: any) => `
 #### ${phase.phaseName} (${phase.timeline})
 
 **Focus Areas:**
@@ -328,7 +328,7 @@ ${phase.focusAreas?.map((f: string) => `- ${f}`).join("\n") || ""}
 
 **Expected Outcomes:**
 ${phase.expectedOutcomes?.map((o: string) => `- ${o}`).join("\n") || ""}
-`).join("\n") || ""}
+`).join("\n") : ""}
 
 ### Investment Packages
 
