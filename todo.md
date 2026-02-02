@@ -311,3 +311,16 @@
 - server/rankingTracker.ts (detect blocks, don't fabricate data)
 - server/routers.ts (add validation layer before saving)
 - client/src/pages/Report.tsx (add data sources banner)
+
+
+## 🔧 PROPER FIX - Real Data Integration (In Progress)
+
+- [ ] Integrate Google Places API for real GBP data (replace screen scraping)
+- [ ] Integrate SerpAPI for real ranking data (replace blocked Google scraping)
+- [ ] Add validation layer to ensure LLM outputs match scraped data
+- [ ] Implement data provenance tracking throughout the system
+- [ ] Rewrite LLM prompts to constrain speculation and enforce facts
+- [ ] Fix form validation bug (lead source checkboxes)
+- [ ] Display visual charts inline in web report
+- [ ] Test with real business and verify all data is accurate
+- [ ] Document API costs and usage limits

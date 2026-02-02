@@ -1,0 +1,16 @@
+{
+  "query": "SELECT businessName, primaryLocation, status, LEFT(executiveSummary, 200) as summary_preview FROM audits WHERE id = 60015;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user gvHM7L26eFEKLxd.root --database hmgSMMSSNJCN2iZZwVjazU --execute SELECT businessName, primaryLocation, status, LEFT(executiveSummary, 200) as summary_preview FROM audits WHERE id = 60015;",
+  "rows": [
+    {
+      "businessName": "eighty5labs",
+      "primaryLocation": "San Diego, CA",
+      "status": "completed",
+      "summary_preview": "Eighty5labs, a professional-services firm based in San Diego, CA, is currently experiencing inconsistent lead flow and poor online visibility, hindering its revenue growth and pipeline predictability."
+    }
+  ],
+  "messages": [],
+  "stdout": "businessName\tprimaryLocation\tstatus\tsummary_preview\neighty5labs\tSan Diego, CA\tcompleted\tEighty5labs, a professional-services firm based in San Diego, CA, is currently experiencing inconsistent lead flow and poor online visibility, hindering its revenue growth and pipeline predictability.\n",
+  "stderr": "",
+  "execution_time_ms": 184
+}

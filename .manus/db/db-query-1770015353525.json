@@ -1,0 +1,16 @@
+{
+  "query": "SELECT id, businessName, websiteUrl, status FROM audits ORDER BY id DESC LIMIT 1;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user gvHM7L26eFEKLxd.root --database hmgSMMSSNJCN2iZZwVjazU --execute SELECT id, businessName, websiteUrl, status FROM audits ORDER BY id DESC LIMIT 1;",
+  "rows": [
+    {
+      "id": "90001",
+      "businessName": "Lombardi's Pizza",
+      "websiteUrl": "https://www.lombardispizza.com",
+      "status": "processing"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tbusinessName\twebsiteUrl\tstatus\n90001\tLombardi's Pizza\thttps://www.lombardispizza.com\tprocessing\n",
+  "stderr": "",
+  "execution_time_ms": 56
+}
