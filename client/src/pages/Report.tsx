@@ -24,6 +24,16 @@ export default function Report() {
 
   const { data: audit, isLoading, error } = trpc.audits.getById.useQuery({ id: auditId });
 
+  const generatePDFMutation = trpc.audits.generatePDF.useMutation({
+    onSuccess: (data) => {
+      window.open(data.pdfUrl, "_blank");
+      toast.success("PDF generated successfully!");
+    },
+    onError: (error) => {
+      toast.error(`Failed to generate PDF: ${error.message}`);
+    },
+  });
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-teal-50 flex items-center justify-center">
@@ -108,7 +118,14 @@ export default function Report() {
               <Button variant="outline" onClick={() => toast.info("Email feature coming soon")}>
                 <Mail className="w-4 h-4 mr-2" /> Email Report
               </Button>
-              <Button className="bg-orange-500 hover:bg-orange-600" onClick={() => toast.info("PDF export coming soon")}>
+              <Button 
+                className="bg-orange-500 hover:bg-orange-600" 
+                onClick={() => {
+                  toast.info("Generating PDF... This may take a moment.");
+                  generatePDFMutation.mutate({ auditId: audit.id });
+                }}
+                disabled={generatePDFMutation.isPending}
+              >
                 <Download className="w-4 h-4 mr-2" /> Download PDF
               </Button>
             </div>

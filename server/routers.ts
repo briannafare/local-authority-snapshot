@@ -2,7 +2,11 @@ import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, router } from "./_core/trpc";
+import { generatePDF } from "./pdfGenerator";
 import { z } from "zod";
+import { getDb, getAuditById } from "./db";
+import { audits } from "../drizzle/schema";
+import { eq } from "drizzle-orm";
 
 export const appRouter = router({
     // if you need to use socket.io, read and register route in server/_core/index.ts, all api should start with '/api/' so that the gateway can route correctly
@@ -19,6 +23,53 @@ export const appRouter = router({
   }),
 
   audits: router({
+    generatePDF: publicProcedure
+      .input(z.object({ auditId: z.number() }))
+      .mutation(async ({ input }) => {
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+
+        // Get audit data
+        const audit = await getAuditById(input.auditId);
+        if (!audit) throw new Error("Audit not found");
+
+        // Parse JSON fields
+        const gbpAudit = audit.gbpAuditResults ? JSON.parse(audit.gbpAuditResults) : {};
+        const seoAudit = audit.seoAuditResults ? JSON.parse(audit.seoAuditResults) : {};
+        const competitiveAnalysis = audit.competitiveResults ? JSON.parse(audit.competitiveResults) : {};
+        const aeoAnalysis = audit.aeoResults ? JSON.parse(audit.aeoResults) : {};
+        const leadCaptureAnalysis = audit.leadCaptureResults ? JSON.parse(audit.leadCaptureResults) : {};
+        const followUpAnalysis = audit.followUpResults ? JSON.parse(audit.followUpResults) : {};
+        const executiveSummary = audit.executiveSummary ? JSON.parse(audit.executiveSummary) : {};
+        const recommendations = audit.recommendations ? JSON.parse(audit.recommendations) : {};
+
+        // Generate PDF
+        const pdfUrl = await generatePDF({
+          auditId: audit.id,
+          businessName: audit.businessName,
+          primaryLocation: audit.primaryLocation,
+          primaryNiche: audit.primaryNiche,
+          executiveSummary,
+          gbpAudit,
+          seoAudit,
+          competitiveAnalysis,
+          aeoAnalysis,
+          leadCaptureAnalysis,
+          followUpAnalysis,
+          revenueRecapture: recommendations.revenueRecapture || {},
+          recommendedPlan: recommendations.recommendedPlan || {},
+          visualUrls: [], // TODO: Get from audit_visuals table
+        });
+
+        // Update audit with PDF URL
+        await db
+          .update(audits)
+          .set({ pdfUrl })
+          .where(eq(audits.id, input.auditId));
+
+        return { pdfUrl };
+      }),
+
     create: publicProcedure
       .input(
         z.object({

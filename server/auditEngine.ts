@@ -1,4 +1,7 @@
 import { invokeLLM } from "./_core/llm";
+import { searchGBP, analyzeGBPData } from "./gbpScraper";
+import { crawlWebsite, analyzeWebsiteData } from "./websiteCrawler";
+import { searchCompetitors, analyzeCompetitiveData, generateCompetitiveRecommendations } from "./competitiveAnalysis";
 
 export interface AuditInput {
   businessName: string;
@@ -118,23 +121,45 @@ export interface RecommendedPlan {
 }
 
 /**
- * Analyze Google Business Profile
+ * Analyze Google Business Profile with REAL scraped data
  */
 export async function analyzeGBP(input: AuditInput): Promise<GBPAuditResult> {
-  const prompt = `You are a local SEO expert analyzing a Google Business Profile for ${input.businessName}, a ${input.primaryNiche} business in ${input.primaryLocation}.
+  // Step 1: Scrape real GBP data
+  const gbpData = await searchGBP(input.businessName, input.primaryLocation);
+  const gbpAnalysis = analyzeGBPData(gbpData, input.businessName);
 
-Based on industry best practices, provide a comprehensive GBP audit with:
+  // Step 2: Use LLM to generate optimized content based on real data
+  const dataContext = gbpData.error
+    ? `⚠️ REAL DATA: Google Business Profile not found or inaccessible. This business may not have claimed their GBP.`
+    : `✅ REAL DATA FOUND:
+- Business Name: ${gbpData.businessName || "Not found"}
+- Rating: ${gbpData.rating !== null ? `${gbpData.rating} stars` : "No rating"}
+- Review Count: ${gbpData.reviewCount !== null ? `${gbpData.reviewCount} reviews` : "No reviews"}
+- Address: ${gbpData.address || "Not found"}
+- Phone: ${gbpData.phone || "Not found"}
+- Website: ${gbpData.website || "Not found"}
 
-1. GBP Optimization Score (0-100)
-2. Top 10 issues hurting Maps ranking
-3. Top 10 improvements that would increase visibility
-4. Example optimized business description (150-200 words, keyword-rich, location-specific)
-5. Example optimized service list (5-7 services with descriptions)
-6. Example Google Post (engaging, with CTA)
+ANALYSIS BASED ON REAL DATA:
+- Score: ${gbpAnalysis.score}/100
+- Issues: ${gbpAnalysis.issues.join(", ")}
+- Strengths: ${gbpAnalysis.strengths.join(", ")}`;
+
+  const prompt = `You are a local SEO expert. You have REAL scraped data from Google for ${input.businessName}, a ${input.primaryNiche} business in ${input.primaryLocation}.
+
+${dataContext}
+
+Based on this REAL data, provide:
+
+1. Use the calculated score: ${gbpAnalysis.score}
+2. Top 10 issues (combine real issues with additional insights)
+3. Top 10 improvements (combine real recommendations with additional insights)
+4. Example optimized business description (150-200 words, keyword-rich, location-specific, tailored to ${input.primaryNiche})
+5. Example optimized service list (5-7 services with descriptions for ${input.primaryNiche})
+6. Example Google Post (engaging, with CTA, relevant to ${input.primaryNiche})
 
 Return ONLY valid JSON in this exact format:
 {
-  "score": <number 0-100>,
+  "score": ${gbpAnalysis.score},
   "issues": ["issue 1", "issue 2", ...],
   "improvements": ["improvement 1", "improvement 2", ...],
   "optimizedDescription": "full description text",
@@ -150,36 +175,85 @@ Return ONLY valid JSON in this exact format:
   const content = typeof response.choices[0]?.message?.content === 'string' 
     ? response.choices[0].message.content 
     : "{}";
-  return JSON.parse(content);
+  
+  const result = JSON.parse(content);
+  
+  // Ensure score from real data is used
+  result.score = gbpAnalysis.score;
+  
+  // Prepend real data issues and improvements
+  result.issues = [...gbpAnalysis.issues, ...result.issues].slice(0, 10);
+  result.improvements = [...gbpAnalysis.recommendations, ...result.improvements].slice(0, 10);
+  
+  return result;
 }
 
 /**
- * Analyze Website Local SEO
+ * Analyze Website Local SEO with REAL crawled data
  */
 export async function analyzeSEO(input: AuditInput): Promise<SEOAuditResult> {
-  const prompt = `You are a local SEO expert analyzing the website for ${input.businessName}, a ${input.primaryNiche} business in ${input.primaryLocation}.
+  // Step 1: Crawl real website data
+  const websiteData = await crawlWebsite(input.websiteUrl);
+  const websiteAnalysis = analyzeWebsiteData(websiteData);
 
-Website: ${input.websiteUrl}
+  // Calculate score based on real data
+  let score = 50; // Base score
+  if (!websiteData.error) {
+    if (websiteData.title && websiteData.title.length >= 30 && websiteData.title.length <= 60) score += 10;
+    if (websiteData.metaDescription && websiteData.metaDescription.length >= 120) score += 10;
+    if (websiteData.h1Tags.length === 1) score += 10;
+    if (websiteData.schemaTypes.length > 0) score += 10;
+    if (websiteData.napData.phone) score += 5;
+    if (websiteData.hasMobileViewport) score += 5;
+  } else {
+    score = 20; // Very low score if website is inaccessible
+  }
 
-Based on local SEO best practices, provide:
+  // Step 2: Build context from real data
+  const dataContext = websiteData.error
+    ? `⚠️ REAL DATA: Website is inaccessible or failed to load. Error: ${websiteData.error}`
+    : `✅ REAL WEBSITE DATA CRAWLED:
 
-1. Website Local SEO Score (0-100)
-2. Top 10 SEO weaknesses
-3. Top 10 SEO improvements
-4. Example optimized homepage title tag
-5. Example optimized H1 and 3 subheadings (H2/H3)
-6. 3-5 recommended schema types they should add
-7. Query-level table for 5 key search terms (e.g., "[service] in [city]", "[service] near me", brand name)
+CURRENT STATE:
+- Title Tag: "${websiteData.title || "MISSING"}"
+- Meta Description: "${websiteData.metaDescription || "MISSING"}"
+- H1 Tags: ${websiteData.h1Tags.length > 0 ? websiteData.h1Tags.map(h => `"${h}"`).join(", ") : "NONE FOUND"}
+- H2 Tags: ${websiteData.h2Tags.length} found
+- H3 Tags: ${websiteData.h3Tags.length} found
+- Schema Types: ${websiteData.schemaTypes.length > 0 ? websiteData.schemaTypes.join(", ") : "NONE"}
+- NAP Data: ${websiteData.napData.phone ? `Phone: ${websiteData.napData.phone}` : "Phone not found"}, ${websiteData.napData.address ? `Address found` : "Address not found"}
+- CTAs: ${websiteData.ctaElements.buttons} buttons, ${websiteData.ctaElements.forms} forms, ${websiteData.ctaElements.phoneLinks} phone links
+- Mobile Viewport: ${websiteData.hasMobileViewport ? "Yes" : "NO - CRITICAL ISSUE"}
+- Chat Widget: ${websiteData.hasChat ? "Yes" : "No"}
+- Images: ${websiteData.images}
+- Internal Links: ${websiteData.internalLinks}
 
-For each query provide:
-- Organic presence estimate (Top 3, Positions 4-10, Page 2+)
-- Map pack presence (Yes/No/Unclear)
-- Notable competitors above (estimate 1-2 competitor names or "Unknown")
-- Data type (Observed/Assumption)
+ANALYSIS BASED ON REAL DATA:
+- Issues: ${websiteAnalysis.issues.join(", ")}
+- Strengths: ${websiteAnalysis.strengths.join(", ")}
+- Calculated Score: ${score}/100`;
+
+  const prompt = `You are a local SEO expert. You have REAL crawled data from ${input.websiteUrl} for ${input.businessName}, a ${input.primaryNiche} business in ${input.primaryLocation}.
+
+${dataContext}
+
+Based on this REAL data, provide:
+
+1. Use calculated score: ${score}
+2. Top 10 SEO weaknesses (use real issues found)
+3. Top 10 SEO improvements (use real recommendations)
+4. Example optimized homepage title tag (improve their current: "${websiteData.title || "Add title"}")
+5. Example optimized H1 and 3 subheadings (H2/H3) - improve their current headings
+6. 3-5 recommended schema types (they currently have: ${websiteData.schemaTypes.join(", ") || "none"})
+7. Query-level table for 5 key search terms
+
+For queries, mark data type as:
+- "Real Data" if you can infer from actual website content
+- "Industry Benchmark" if making assumptions
 
 Return ONLY valid JSON in this exact format:
 {
-  "score": <number 0-100>,
+  "score": ${score},
   "weaknesses": ["weakness 1", ...],
   "improvements": ["improvement 1", ...],
   "optimizedTitleTag": "title tag text",
@@ -191,7 +265,7 @@ Return ONLY valid JSON in this exact format:
       "organicPresence": "Top 3 | Positions 4-10 | Page 2+",
       "mapPackPresence": "Yes | No | Unclear",
       "competitorsAbove": "Competitor names or Unknown",
-      "dataType": "Observed | Assumption"
+      "dataType": "Real Data | Industry Benchmark"
     }
   ]
 }`;
@@ -204,23 +278,78 @@ Return ONLY valid JSON in this exact format:
   const content = typeof response.choices[0]?.message?.content === 'string' 
     ? response.choices[0].message.content 
     : "{}";
-  return JSON.parse(content);
+  
+  const result = JSON.parse(content);
+  
+  // Ensure score from real data is used
+  result.score = score;
+  
+  // Prepend real data issues and improvements
+  result.weaknesses = [...websiteAnalysis.issues, ...result.weaknesses].slice(0, 10);
+  result.improvements = [...websiteAnalysis.recommendations, ...result.improvements].slice(0, 10);
+  
+  return result;
 }
 
 /**
- * Analyze Competitive Visibility
+ * Analyze Competitive Visibility with REAL search data
  */
 export async function analyzeCompetitive(input: AuditInput): Promise<CompetitiveAnalysisResult> {
-  const prompt = `You are a local SEO expert analyzing competitive visibility for ${input.businessName}, a ${input.primaryNiche} business in ${input.primaryLocation}.
+  // Step 1: Search for real competitors
+  const competitorData = await searchCompetitors(
+    input.primaryNiche,
+    input.primaryLocation,
+    input.businessName
+  );
 
-Simulate what Google would likely show for searches like:
-- "${input.primaryNiche} near me"
-- "${input.primaryNiche} in ${input.primaryLocation}"
+  // Get GBP data for comparison
+  const yourGBP = await searchGBP(input.businessName, input.primaryLocation);
 
-Provide:
-1. 5 reasons competitors likely rank higher
-2. 5 gaps in authority/trust signals
-3. 5 content or profile advantages competitors likely have
+  // Analyze competitive data
+  const analysis = analyzeCompetitiveData(
+    competitorData,
+    yourGBP.rating,
+    yourGBP.reviewCount
+  );
+
+  const recommendations = generateCompetitiveRecommendations(
+    analysis.insights,
+    analysis.gaps,
+    analysis.advantages
+  );
+
+  // Build context from real data
+  const dataContext = competitorData.error
+    ? `⚠️ REAL DATA: Unable to search competitors. Using industry assumptions.`
+    : `✅ REAL COMPETITOR DATA FOUND:
+
+Search Query: "${competitorData.searchQuery}"
+Total Competitors Found: ${competitorData.totalResults}
+Your Position: ${competitorData.yourPosition !== null ? `#${competitorData.yourPosition}` : "Not found in top 10"}
+
+TOP COMPETITORS:
+${competitorData.competitors.slice(0, 5).map((c, i) => 
+  `${i + 1}. ${c.name}${c.rating ? ` - ${c.rating}⭐ (${c.reviewCount} reviews)` : ""}`
+).join("\n")}
+
+YOUR DATA:
+- Rating: ${yourGBP.rating || "No rating"}
+- Reviews: ${yourGBP.reviewCount || "No reviews"}
+
+ANALYSIS:
+- Insights: ${analysis.insights.join(", ")}
+- Gaps: ${analysis.gaps.join(", ")}
+- Advantages: ${analysis.advantages.join(", ")}`;
+
+  const prompt = `You are a local SEO expert. You have REAL competitor search data for ${input.businessName}, a ${input.primaryNiche} business in ${input.primaryLocation}.
+
+${dataContext}
+
+Based on this REAL data, provide:
+
+1. 5 reasons competitors likely rank higher (use real insights)
+2. 5 gaps in authority/trust signals (use real gaps)
+3. 5 content or profile advantages competitors likely have (use real advantages)
 
 Return ONLY valid JSON in this exact format:
 {
@@ -237,7 +366,15 @@ Return ONLY valid JSON in this exact format:
   const content = typeof response.choices[0]?.message?.content === 'string' 
     ? response.choices[0].message.content 
     : "{}";
-  return JSON.parse(content);
+  
+  const result = JSON.parse(content);
+  
+  // Prepend real data insights
+  result.reasonsCompetitorsRank = [...analysis.insights.slice(0, 3), ...result.reasonsCompetitorsRank].slice(0, 5);
+  result.trustGaps = [...analysis.gaps.slice(0, 3), ...result.trustGaps].slice(0, 5);
+  result.competitorAdvantages = [...analysis.advantages.slice(0, 2), ...result.competitorAdvantages].slice(0, 5);
+  
+  return result;
 }
 
 /**
