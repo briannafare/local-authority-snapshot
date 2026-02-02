@@ -3,6 +3,7 @@ import { searchGBP, analyzeGBPData } from "./gbpScraper";
 import { fetchGBPFromUrl, analyzeGBPFromUrl } from "./gbpUrlParser";
 import { crawlWebsite, analyzeWebsiteData } from "./websiteCrawler";
 import { searchCompetitors, analyzeCompetitiveData, generateCompetitiveRecommendations } from "./competitiveAnalysis";
+import { trackRankings, analyzeRankings } from "./rankingTracker";
 
 export interface AuditInput {
   businessName: string;
@@ -47,6 +48,19 @@ export interface SEOAuditResult {
     competitorsAbove: string;
     dataType: string;
   }>;
+  rankingData?: {
+    averagePosition: number | null;
+    inLocalPack: boolean;
+    topCompetitors: string[];
+    queries: Array<{
+      query: string;
+      position: number | null;
+      competitors: Array<{
+        position: number;
+        businessName: string;
+      }>;
+    }>;
+  };
 }
 
 export interface CompetitiveAnalysisResult {
@@ -316,6 +330,48 @@ Return ONLY valid JSON in this exact format:
   // Prepend real data issues and improvements
   result.weaknesses = [...websiteAnalysis.issues, ...result.weaknesses].slice(0, 10);
   result.improvements = [...websiteAnalysis.recommendations, ...result.improvements].slice(0, 10);
+  
+  // Step 3: Track real search rankings (async, don't block)
+  try {
+    console.log(`[SEO Audit] Tracking rankings for ${input.businessName}...`);
+    const rankingResult = await trackRankings(
+      input.businessName,
+      input.websiteUrl,
+      input.primaryLocation,
+      input.primaryNiche
+    );
+    
+    const rankingAnalysis = analyzeRankings(rankingResult, input.primaryNiche);
+    
+    // Add ranking data to result
+    result.rankingData = {
+      averagePosition: rankingResult.averagePosition,
+      inLocalPack: rankingResult.inLocalPack,
+      topCompetitors: rankingResult.topCompetitors,
+      queries: rankingResult.queries.map(q => ({
+        query: q.query,
+        position: q.position,
+        competitors: q.competitors.slice(0, 3).map(c => ({
+          position: c.position,
+          businessName: c.businessName,
+        })),
+      })),
+    };
+    
+    // Adjust score based on rankings
+    if (rankingAnalysis.score > result.score) {
+      result.score = Math.round((result.score + rankingAnalysis.score) / 2);
+    }
+    
+    // Add ranking insights to weaknesses/improvements
+    result.weaknesses = [...result.weaknesses, ...rankingAnalysis.issues].slice(0, 10);
+    result.improvements = [...result.improvements, ...rankingAnalysis.recommendations].slice(0, 10);
+    
+    console.log(`[SEO Audit] Ranking tracking complete. Average position: ${rankingResult.averagePosition}`);
+  } catch (error) {
+    console.error(`[SEO Audit] Failed to track rankings:`, error);
+    // Continue without ranking data
+  }
   
   return result;
 }

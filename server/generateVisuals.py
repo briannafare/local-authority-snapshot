@@ -97,36 +97,7 @@ def create_metric_card(value, label, sublabel, filename, color=ORANGE):
     plt.close()
     print(f"Generated: {filename}")
 
-def create_comparison_chart(data, title, filename):
-    """Create a horizontal bar chart for comparisons"""
-    fig, ax = plt.subplots(figsize=(10, 6), facecolor=WHITE)
-    
-    categories = [item['category'] for item in data]
-    values = [item['value'] for item in data]
-    colors_list = [ORANGE if i % 2 == 0 else TEAL for i in range(len(categories))]
-    
-    y_pos = np.arange(len(categories))
-    bars = ax.barh(y_pos, values, color=colors_list, height=0.6)
-    
-    ax.set_yticks(y_pos)
-    ax.set_yticklabels(categories, fontsize=12)
-    ax.set_xlabel('Score', fontsize=12, fontweight='600')
-    ax.set_title(title, fontsize=18, fontweight='bold', pad=20, color=DARK_GRAY)
-    ax.set_xlim(0, 100)
-    
-    # Add value labels on bars
-    for i, (bar, value) in enumerate(zip(bars, values)):
-        ax.text(value + 2, bar.get_y() + bar.get_height()/2,
-                f'{value}', va='center', fontsize=11, fontweight='600')
-    
-    ax.spines['top'].set_visible(False)
-    ax.spines['right'].set_visible(False)
-    ax.grid(axis='x', alpha=0.3, linestyle='--')
-    
-    plt.tight_layout()
-    plt.savefig(filename, dpi=150, bbox_inches='tight', facecolor=WHITE)
-    plt.close()
-    print(f"Generated: {filename}")
+
 
 def create_funnel_chart(stages, title, filename):
     """Create a funnel visualization for conversion analysis"""
@@ -216,7 +187,11 @@ def main():
         create_metric_card(data['value'], data['label'], data['sublabel'], 
                           output_path, color)
     elif command == "comparison_chart":
-        create_comparison_chart(data['data'], data['title'], output_path)
+        create_comparison_chart(data, output_path)
+    elif command == "ranking_comparison":
+        create_ranking_comparison(data, output_path)
+    elif command == "heat_map":
+        create_heat_map(data, output_path)
     elif command == "funnel_chart":
         create_funnel_chart(data['stages'], data['title'], output_path)
     elif command == "revenue_opportunity":
@@ -224,6 +199,199 @@ def main():
     else:
         print(f"Unknown command: {command}")
         sys.exit(1)
+
+def create_comparison_chart(data, filename):
+    """
+    Create a comparison bar chart for business vs competitors
+    data = {
+        "businesses": ["Your Business", "Competitor A", "Competitor B"],
+        "ratings": [4.8, 4.5, 4.2],
+        "reviews": [150, 200, 80],
+        "metric": "ratings"  # or "reviews"
+    }
+    """
+    fig, ax = plt.subplots(figsize=(10, 6), facecolor=WHITE)
+    
+    businesses = data.get("businesses", [])
+    values = data.get("ratings", []) if data.get("metric") == "ratings" else data.get("reviews", [])
+    metric = data.get("metric", "ratings")
+    
+    # Create bars
+    x = np.arange(len(businesses))
+    colors = [ORANGE if i == 0 else LIGHT_GRAY for i in range(len(businesses))]
+    bars = ax.bar(x, values, color=colors, edgecolor=DARK_GRAY, linewidth=1.5)
+    
+    # Highlight your business
+    bars[0].set_color(TEAL)
+    bars[0].set_edgecolor(ORANGE)
+    bars[0].set_linewidth(2)
+    
+    # Add value labels on top of bars
+    for i, (bar, value) in enumerate(zip(bars, values)):
+        height = bar.get_height()
+        ax.text(bar.get_x() + bar.get_width()/2., height,
+                f'{value:.1f}' if metric == "ratings" else f'{int(value)}',
+                ha='center', va='bottom', fontsize=12, fontweight='bold',
+                color=DARK_GRAY)
+    
+    # Styling
+    ax.set_xticks(x)
+    ax.set_xticklabels(businesses, fontsize=11, color=DARK_GRAY)
+    ax.set_ylabel(metric.capitalize(), fontsize=12, fontweight='bold', color=DARK_GRAY)
+    ax.set_title(f'{metric.capitalize()} Comparison', fontsize=14, fontweight='bold', 
+                 color=DARK_GRAY, pad=20)
+    
+    # Remove top and right spines
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+    ax.spines['left'].set_color(LIGHT_GRAY)
+    ax.spines['bottom'].set_color(LIGHT_GRAY)
+    
+    # Grid
+    ax.yaxis.grid(True, linestyle='--', alpha=0.3, color=LIGHT_GRAY)
+    ax.set_axisbelow(True)
+    
+    plt.tight_layout()
+    plt.savefig(filename, dpi=150, facecolor=WHITE, edgecolor='none')
+    plt.close()
+    print(f"Generated: {filename}")
+
+
+def create_ranking_comparison(data, filename):
+    """
+    Create a ranking position comparison chart
+    data = {
+        "queries": ["service near me", "service in city", "best service"],
+        "your_positions": [3, 5, 1],
+        "competitor_positions": [1, 2, 4]
+    }
+    """
+    fig, ax = plt.subplots(figsize=(12, 6), facecolor=WHITE)
+    
+    queries = data.get("queries", [])
+    your_positions = data.get("your_positions", [])
+    competitor_positions = data.get("competitor_positions", [])
+    
+    x = np.arange(len(queries))
+    width = 0.35
+    
+    # Create bars (inverted so lower position = higher bar)
+    max_position = max(max(your_positions, default=0), max(competitor_positions, default=0))
+    your_bars = ax.bar(x - width/2, [max_position - p + 1 for p in your_positions], 
+                       width, label='Your Business', color=TEAL, edgecolor=DARK_GRAY, linewidth=1.5)
+    comp_bars = ax.bar(x + width/2, [max_position - p + 1 for p in competitor_positions], 
+                       width, label='Top Competitor', color=LIGHT_GRAY, edgecolor=DARK_GRAY, linewidth=1.5)
+    
+    # Add position labels
+    for i, (your_pos, comp_pos) in enumerate(zip(your_positions, competitor_positions)):
+        ax.text(i - width/2, max_position - your_pos + 1.5, f'#{your_pos}',
+                ha='center', va='bottom', fontsize=10, fontweight='bold', color=DARK_GRAY)
+        ax.text(i + width/2, max_position - comp_pos + 1.5, f'#{comp_pos}',
+                ha='center', va='bottom', fontsize=10, fontweight='bold', color=DARK_GRAY)
+    
+    # Styling
+    ax.set_xticks(x)
+    ax.set_xticklabels(queries, fontsize=10, color=DARK_GRAY, rotation=15, ha='right')
+    ax.set_ylabel('Ranking Position (lower is better)', fontsize=12, fontweight='bold', color=DARK_GRAY)
+    ax.set_title('Search Ranking Comparison', fontsize=14, fontweight='bold', 
+                 color=DARK_GRAY, pad=20)
+    ax.legend(loc='upper right', frameon=False, fontsize=11)
+    
+    # Invert y-axis labels to show actual positions
+    y_ticks = ax.get_yticks()
+    ax.set_yticklabels([f'#{int(max_position - y + 1)}' if y > 0 else '' for y in y_ticks])
+    
+    # Remove top and right spines
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+    ax.spines['left'].set_color(LIGHT_GRAY)
+    ax.spines['bottom'].set_color(LIGHT_GRAY)
+    
+    plt.tight_layout()
+    plt.savefig(filename, dpi=150, facecolor=WHITE, edgecolor='none')
+    plt.close()
+    print(f"Generated: {filename}")
+
+
+def create_heat_map(data, filename):
+    """
+    Create a geographic heat map showing ranking coverage
+    data = {
+        "title": "Ranking Coverage Map",
+        "grid": [
+            [1, 3, 5, None, None],
+            [2, 1, 4, 8, None],
+            [3, 2, 3, 5, 10],
+            [None, 4, 2, 4, 7],
+            [None, None, 5, 6, 8]
+        ],
+        "center_label": "Your City"
+    }
+    None = not ranking, numbers = position
+    """
+    fig, ax = plt.subplots(figsize=(10, 8), facecolor=WHITE)
+    
+    grid = np.array(data.get("grid", []))
+    title = data.get("title", "Ranking Coverage Map")
+    center_label = data.get("center_label", "")
+    
+    # Create custom colormap: green (top 3), yellow (4-10), orange (11-20), red (20+), gray (None)
+    from matplotlib.colors import ListedColormap, BoundaryNorm
+    
+    # Replace None with -1 for visualization
+    grid_viz = np.where(grid == None, -1, grid).astype(float)
+    
+    # Create color map
+    colors = ['#D1D5DB', '#10B981', '#FCD34D', '#F59E0B', '#EF4444']  # gray, green, yellow, orange, red
+    n_bins = 5
+    cmap = ListedColormap(colors)
+    bounds = [-1.5, 0, 3.5, 10.5, 20.5, 100]
+    norm = BoundaryNorm(bounds, cmap.N)
+    
+    # Create heatmap
+    im = ax.imshow(grid_viz, cmap=cmap, norm=norm, aspect='auto')
+    
+    # Add grid lines
+    ax.set_xticks(np.arange(grid.shape[1]+1)-.5, minor=True)
+    ax.set_yticks(np.arange(grid.shape[0]+1)-.5, minor=True)
+    ax.grid(which="minor", color=WHITE, linestyle='-', linewidth=2)
+    ax.tick_params(which="minor", size=0)
+    
+    # Remove ticks
+    ax.set_xticks([])
+    ax.set_yticks([])
+    
+    # Add text annotations
+    for i in range(grid.shape[0]):
+        for j in range(grid.shape[1]):
+            if grid[i, j] is not None and not np.isnan(grid[i, j]):
+                text = ax.text(j, i, f'#{int(grid[i, j])}',
+                             ha="center", va="center", color=WHITE, fontsize=12, fontweight='bold')
+            elif grid[i, j] is None or np.isnan(grid[i, j]):
+                text = ax.text(j, i, '—',
+                             ha="center", va="center", color=DARK_GRAY, fontsize=14)
+    
+    # Add center label
+    center_i, center_j = grid.shape[0] // 2, grid.shape[1] // 2
+    ax.text(center_j, center_i + 0.3, center_label,
+            ha="center", va="top", color=WHITE, fontsize=9, 
+            style='italic', bbox=dict(boxstyle='round,pad=0.3', facecolor=DARK_GRAY, alpha=0.7))
+    
+    # Title
+    ax.set_title(title, fontsize=14, fontweight='bold', color=DARK_GRAY, pad=20)
+    
+    # Add legend
+    legend_labels = ['Not Ranking', 'Top 3', 'Top 10', 'Top 20', '20+']
+    legend_colors = colors
+    patches = [mpatches.Patch(color=color, label=label) for color, label in zip(legend_colors, legend_labels)]
+    ax.legend(handles=patches, loc='upper left', bbox_to_anchor=(1.02, 1), 
+             frameon=False, fontsize=10)
+    
+    plt.tight_layout()
+    plt.savefig(filename, dpi=150, facecolor=WHITE, edgecolor='none', bbox_inches='tight')
+    plt.close()
+    print(f"Generated: {filename}")
+
 
 if __name__ == "__main__":
     main()
