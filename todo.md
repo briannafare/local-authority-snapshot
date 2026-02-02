@@ -324,3 +324,11 @@
 - [ ] Display visual charts inline in web report
 - [ ] Test with real business and verify all data is accurate
 - [ ] Document API costs and usage limits
+
+
+## 🔧 SerpStack Integration (In Progress)
+
+- [ ] Add SERPSTACK_API_KEY to environment
+- [ ] Create serpstack.ts module for API calls
+- [ ] Update rankingTracker.ts to use SerpStack instead of direct Google scraping
+- [ ] Test with real business to verify ranking data

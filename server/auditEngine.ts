@@ -5,6 +5,7 @@ import { fetchGBPFromUrl, analyzeGBPFromUrl } from "./gbpUrlParser";
 import { crawlWebsite, analyzeWebsiteData } from "./websiteCrawler";
 import { searchCompetitors, analyzeCompetitiveData, generateCompetitiveRecommendations } from "./competitiveAnalysis";
 import { trackRankings, analyzeRankings } from "./rankingTracker";
+import { trackMultipleQueries } from "./serpstackAPI";
 
 export interface AuditInput {
   businessName: string;
@@ -478,43 +479,86 @@ Return ONLY valid JSON in this exact format:
   // Add data provenance flag
   result.dataSource = websiteData.error ? 'unavailable' : 'crawl';
   
-  // Step 3: Track real search rankings (async, don't block)
+  // Step 3: Track real search rankings with SerpStack API
   try {
-    console.log(`[SEO Audit] Tracking rankings for ${input.businessName}...`);
-    const rankingResult = await trackRankings(
-      input.businessName,
-      input.websiteUrl,
-      input.primaryLocation,
-      input.primaryNiche
-    );
+    console.log(`[SEO Audit] Tracking rankings for ${input.businessName} via SerpStack...`);
     
-    const rankingAnalysis = analyzeRankings(rankingResult, input.primaryNiche);
+    // Generate search queries
+    const queries = [
+      `${input.primaryNiche} ${input.primaryLocation}`,
+      `${input.primaryNiche} near me`,
+      `best ${input.primaryNiche} ${input.primaryLocation}`,
+      input.businessName
+    ];
+    
+    // Track rankings via SerpStack
+    const rankingResults = await trackMultipleQueries(queries, input.websiteUrl);
+    
+    // Calculate average position (only for queries where business was found)
+    const foundPositions = rankingResults
+      .filter(r => r.yourPosition !== null)
+      .map(r => r.yourPosition!);
+    const averagePosition = foundPositions.length > 0
+      ? Math.round(foundPositions.reduce((a, b) => a + b, 0) / foundPositions.length)
+      : null;
+    
+    // Check if in local pack
+    const inLocalPack = rankingResults.some(r => r.localPackResults.some(lr => 
+      lr.link.includes(input.websiteUrl.replace(/^https?:\/\//, '').replace('www.', ''))
+    ));
+    
+    // Get top competitors
+    const allCompetitors = new Set<string>();
+    rankingResults.forEach(r => {
+      r.topResults.slice(0, 5).forEach(result => {
+        if (!result.link.includes(input.websiteUrl.replace(/^https?:\/\//, '').replace('www.', ''))) {
+          allCompetitors.add(result.title);
+        }
+      });
+    });
+    const topCompetitors = Array.from(allCompetitors).slice(0, 5);
     
     // Add ranking data to result
     result.rankingData = {
-      averagePosition: rankingResult.averagePosition,
-      inLocalPack: rankingResult.inLocalPack,
-      topCompetitors: rankingResult.topCompetitors,
-      queries: rankingResult.queries.map(q => ({
-        query: q.query,
-        position: q.position,
-        competitors: q.competitors.slice(0, 3).map(c => ({
-          position: c.position,
-          businessName: c.businessName,
+      averagePosition,
+      inLocalPack,
+      topCompetitors,
+      queries: rankingResults.map(r => ({
+        query: r.query,
+        position: r.yourPosition,
+        competitors: r.topResults.slice(0, 3).map((c, idx) => ({
+          position: idx + 1,
+          businessName: c.title,
         })),
       })),
     };
     
     // Adjust score based on rankings
-    if (rankingAnalysis.score > result.score) {
-      result.score = Math.round((result.score + rankingAnalysis.score) / 2);
+    if (averagePosition && averagePosition <= 10) {
+      result.score = Math.min(100, result.score + 20);
+    } else if (averagePosition && averagePosition <= 20) {
+      result.score = Math.min(100, result.score + 10);
     }
     
-    // Add ranking insights to weaknesses/improvements
-    result.weaknesses = [...result.weaknesses, ...rankingAnalysis.issues].slice(0, 10);
-    result.improvements = [...result.improvements, ...rankingAnalysis.recommendations].slice(0, 10);
+    if (inLocalPack) {
+      result.score = Math.min(100, result.score + 15);
+    }
     
-    console.log(`[SEO Audit] Ranking tracking complete. Average position: ${rankingResult.averagePosition}`);
+    // Add ranking insights
+    if (!averagePosition) {
+      result.weaknesses.push('Not ranking in top 20 for key search terms');
+      result.improvements.push('Implement local SEO strategy to improve search visibility');
+    } else if (averagePosition > 10) {
+      result.weaknesses.push(`Average ranking position is ${averagePosition} - needs improvement`);
+      result.improvements.push('Optimize content and build local citations to improve rankings');
+    }
+    
+    if (!inLocalPack) {
+      result.weaknesses.push('Not appearing in Google Local Pack');
+      result.improvements.push('Optimize GBP and build local relevance signals');
+    }
+    
+    console.log(`[SEO Audit] Ranking tracking complete. Average position: ${averagePosition || 'Not found'}, Local Pack: ${inLocalPack}`);
   } catch (error) {
     console.error(`[SEO Audit] Failed to track rankings:`, error);
     // Continue without ranking data
