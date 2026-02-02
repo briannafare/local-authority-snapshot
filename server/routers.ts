@@ -42,6 +42,9 @@ export const appRouter = router({
         const followUpAnalysis = audit.followUpResults ? JSON.parse(audit.followUpResults) : {};
         const executiveSummary = audit.executiveSummary ? JSON.parse(audit.executiveSummary) : {};
         const recommendations = audit.recommendations ? JSON.parse(audit.recommendations) : {};
+        
+        // Get visual URLs from audit_visuals table
+        const visualUrls = (audit as any).visuals?.map((v: any) => v.url) || [];
 
         // Generate PDF
         const pdfUrl = await generatePDF({
@@ -58,7 +61,7 @@ export const appRouter = router({
           followUpAnalysis,
           revenueRecapture: recommendations.revenueRecapture || {},
           recommendedPlan: recommendations.recommendedPlan || {},
-          visualUrls: [], // TODO: Get from audit_visuals table
+          visualUrls,
         });
 
         // Update audit with PDF URL

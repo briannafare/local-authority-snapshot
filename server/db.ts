@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users, audits, InsertAudit, auditVisuals, InsertAuditVisual } from "../drizzle/schema";
+import { InsertUser, users, audits, auditVisuals, InsertAudit, InsertAuditVisual } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -102,8 +102,18 @@ export async function getAuditById(id: number) {
   const db = await getDb();
   if (!db) return undefined;
   
-  const result = await db.select().from(audits).where(eq(audits.id, id)).limit(1);
-  return result.length > 0 ? result[0] : undefined;
+  const auditResult = await db.select().from(audits).where(eq(audits.id, id)).limit(1);
+  if (auditResult.length === 0) return undefined;
+  
+  const audit = auditResult[0];
+  
+  // Fetch associated visuals
+  const visualsResult = await db.select().from(auditVisuals).where(eq(auditVisuals.auditId, id));
+  
+  return {
+    ...audit,
+    visuals: visualsResult,
+  };
 }
 
 export async function updateAudit(id: number, data: Partial<InsertAudit>) {

@@ -183,6 +183,28 @@ ${seoAudit.queries?.map((q: any) => `
 - Data Type: ${q.dataType}
 `).join("\n") || ""}
 
+${seoAudit.rankingData ? `
+### Real Search Ranking Data 🎯
+
+**Average Position:** ${seoAudit.rankingData.averagePosition !== null ? `#${seoAudit.rankingData.averagePosition.toFixed(1)}` : 'Not ranking'}  
+**Local Pack Presence:** ${seoAudit.rankingData.inLocalPack ? '✓ Yes' : '✗ No'}  
+**Top Competitors:** ${seoAudit.rankingData.topCompetitors.length} identified
+
+#### Position by Query
+
+${seoAudit.rankingData.queries?.map((q: any) => `
+**"${q.query}"**  
+- Your Position: ${q.position ? `#${q.position}` : 'Not ranking'}  
+${q.competitors && q.competitors.length > 0 ? `- Top Competitors: ${q.competitors.map((c: any) => `#${c.position}: ${c.businessName}`).join(', ')}` : ''}
+`).join("\n") || ""}
+
+### Visual Analytics
+
+${visualUrls.filter(url => url.includes('ranking-comparison') || url.includes('heat-map')).map(url => `
+![Visual Analytics](${url})
+`).join("\n") || ''}
+` : ''}
+
 ---
 
 ## 3. Competitive Analysis

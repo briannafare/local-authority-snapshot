@@ -178,3 +178,24 @@
 - [ ] Display heat map in report interface
 - [ ] Update PDF generator to include new visualizations
 - [ ] Test all visualizations with real data
+
+
+## Phase 14: Report UI & PDF Integration
+
+### Report Interface Updates
+- [x] Add ranking data section to Report.tsx
+- [x] Display average position and local pack status
+- [x] Show ranking comparison chart in SEO section
+- [x] Display geographic heat map in SEO section
+- [x] Add query-level ranking table with positions
+- [x] Style new sections with eighty5labs branding
+- [x] Update getAuditById to include visuals from database
+
+### PDF Export Integration
+- [x] Update pdfGenerator.ts to include ranking data
+- [x] Embed ranking comparison chart in PDF
+- [x] Embed geographic heat map in PDF
+- [x] Ensure all new visualizations are included in PDF
+- [x] Update routers.ts to fetch visual URLs from database
+- [ ] Test PDF generation with new charts
+- [ ] Verify PDF layout and image quality

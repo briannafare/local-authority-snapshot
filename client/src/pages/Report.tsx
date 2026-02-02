@@ -294,6 +294,132 @@ export default function Report() {
                   </div>
                 )}
 
+                {/* Real Ranking Data Section */}
+                {seo.rankingData && (
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-2 mb-3">
+                      <Target className="w-5 h-5 text-orange-500" />
+                      <h4 className="font-semibold">Real Search Ranking Data</h4>
+                      <Badge variant="outline" className="bg-teal-50 text-teal-700 border-teal-200">
+                        Live Data
+                      </Badge>
+                    </div>
+
+                    {/* Ranking Summary */}
+                    <div className="grid md:grid-cols-3 gap-4">
+                      {seo.rankingData.averagePosition !== null && (
+                        <div className="bg-gradient-to-br from-orange-50 to-orange-100 p-4 rounded-lg">
+                          <div className="text-2xl font-bold text-orange-600">
+                            #{seo.rankingData.averagePosition.toFixed(1)}
+                          </div>
+                          <div className="text-sm text-gray-600">Average Position</div>
+                        </div>
+                      )}
+                      <div className={`p-4 rounded-lg ${
+                        seo.rankingData.inLocalPack 
+                          ? 'bg-gradient-to-br from-teal-50 to-teal-100' 
+                          : 'bg-gradient-to-br from-gray-50 to-gray-100'
+                      }`}>
+                        <div className="text-2xl font-bold">
+                          {seo.rankingData.inLocalPack ? '✓' : '✗'}
+                        </div>
+                        <div className="text-sm text-gray-600">Local Pack Presence</div>
+                      </div>
+                      {seo.rankingData.topCompetitors.length > 0 && (
+                        <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-4 rounded-lg">
+                          <div className="text-2xl font-bold text-purple-600">
+                            {seo.rankingData.topCompetitors.length}
+                          </div>
+                          <div className="text-sm text-gray-600">Top Competitors</div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Query-Level Rankings */}
+                    {seo.rankingData.queries && seo.rankingData.queries.length > 0 && (
+                      <div>
+                        <h5 className="font-medium mb-2 text-sm">Position by Query</h5>
+                        <div className="overflow-x-auto">
+                          <table className="w-full text-sm">
+                            <thead>
+                              <tr className="border-b bg-gray-50">
+                                <th className="text-left py-2 px-3">Search Query</th>
+                                <th className="text-center py-2 px-3">Your Position</th>
+                                <th className="text-left py-2 px-3">Top Competitors</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {seo.rankingData.queries.map((q: any, i: number) => (
+                                <tr key={i} className="border-b hover:bg-gray-50">
+                                  <td className="py-2 px-3 font-medium">{q.query}</td>
+                                  <td className="py-2 px-3 text-center">
+                                    {q.position ? (
+                                      <Badge 
+                                        variant="outline" 
+                                        className={`${
+                                          q.position <= 3 
+                                            ? 'bg-teal-50 text-teal-700 border-teal-200' 
+                                            : q.position <= 10 
+                                            ? 'bg-orange-50 text-orange-700 border-orange-200'
+                                            : 'bg-red-50 text-red-700 border-red-200'
+                                        }`}
+                                      >
+                                        #{q.position}
+                                      </Badge>
+                                    ) : (
+                                      <span className="text-gray-400">Not ranking</span>
+                                    )}
+                                  </td>
+                                  <td className="py-2 px-3 text-xs">
+                                    {q.competitors && q.competitors.length > 0 ? (
+                                      <div className="space-y-1">
+                                        {q.competitors.slice(0, 2).map((c: any, ci: number) => (
+                                          <div key={ci} className="text-gray-600">
+                                            #{c.position}: {c.businessName}
+                                          </div>
+                                        ))}
+                                      </div>
+                                    ) : (
+                                      <span className="text-gray-400">No data</span>
+                                    )}
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Visual Charts */}
+                {audit.visuals && audit.visuals.length > 0 && (
+                  <div className="space-y-4">
+                    <h4 className="font-semibold mb-3">Visual Analytics</h4>
+                    <div className="grid md:grid-cols-2 gap-4">
+                      {audit.visuals
+                        .filter((v: any) => 
+                          v.visualType === 'ranking_comparison' || 
+                          v.visualType === 'ranking_heat_map'
+                        )
+                        .map((visual: any) => (
+                          <div key={visual.id} className="border rounded-lg overflow-hidden bg-white shadow-sm">
+                            <img 
+                              src={visual.url} 
+                              alt={visual.description} 
+                              className="w-full h-auto"
+                            />
+                            <div className="p-3 bg-gray-50 text-xs text-gray-600">
+                              {visual.description}
+                            </div>
+                          </div>
+                        ))
+                      }
+                    </div>
+                  </div>
+                )}
+
                 {seo.weaknesses && seo.weaknesses.length > 0 && (
                   <div>
                     <h4 className="font-semibold mb-3 text-red-600">SEO Weaknesses</h4>
