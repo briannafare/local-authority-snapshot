@@ -1,0 +1,40 @@
+{
+  "query": "SELECT id, businessName, websiteUrl, status FROM audits ORDER BY id DESC LIMIT 5;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user gvHM7L26eFEKLxd.root --database hmgSMMSSNJCN2iZZwVjazU --execute SELECT id, businessName, websiteUrl, status FROM audits ORDER BY id DESC LIMIT 5;",
+  "rows": [
+    {
+      "id": "60015",
+      "businessName": "eighty5labs",
+      "websiteUrl": "https://eighty5labs.com",
+      "status": "completed"
+    },
+    {
+      "id": "60014",
+      "businessName": "eighty5labs",
+      "websiteUrl": "https://eighty5labs.com",
+      "status": "completed"
+    },
+    {
+      "id": "60013",
+      "businessName": "eighty5labs",
+      "websiteUrl": "https://eighty5labs.com",
+      "status": "completed"
+    },
+    {
+      "id": "60012",
+      "businessName": "eighty5labs",
+      "websiteUrl": "https://eighty5labs.com",
+      "status": "completed"
+    },
+    {
+      "id": "60011",
+      "businessName": "eighty5labs",
+      "websiteUrl": "https://eighty5labs.com",
+      "status": "completed"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tbusinessName\twebsiteUrl\tstatus\n60015\teighty5labs\thttps://eighty5labs.com\tcompleted\n60014\teighty5labs\thttps://eighty5labs.com\tcompleted\n60013\teighty5labs\thttps://eighty5labs.com\tcompleted\n60012\teighty5labs\thttps://eighty5labs.com\tcompleted\n60011\teighty5labs\thttps://eighty5labs.com\tcompleted\n",
+  "stderr": "",
+  "execution_time_ms": 51
+}

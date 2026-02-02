@@ -289,3 +289,25 @@
 - [ ] Include PDF attachment in emails
 - [ ] Add executive summary in email body
 - [ ] Test email delivery end-to-end
+
+
+## 🚨 CRITICAL: Data Hallucination Root Cause (Debug Agent Analysis)
+
+**Problem**: System generates plausible but fake data when scraping fails or returns sparse results
+
+### Core Issues to Fix:
+- [ ] Add data provenance tracking - store {value, source:'crawl|gbp|rank|user', confidence} for every field
+- [ ] Implement hard validation after LLM - assert output contains exact scraped title/meta/H1 or explicitly states "missing"
+- [ ] Gate report generation - if websiteData.error or GBP fetch fails, generate "data unavailable" sections instead of confident fake statements
+- [ ] Fix location correctness - extract address from schema/footer, compare with user input, show warning if mismatch
+- [ ] Replace Google HTML scraping - detect CAPTCHA/consent pages and mark rankingData as unavailable
+- [ ] Improve GBP scraper - require valid GBP URL for real mode, otherwise mark as "benchmark/unavailable"
+- [ ] Add "Data Sources" banner in Report.tsx - show what's real vs. assumed to make hallucinations obvious
+- [ ] Add integration tests - crawl known site, assert stored facts match expected, verify LLM output references them
+
+### Files to Fix:
+- server/auditEngine.ts (analyzeSEO, analyzeGBP - add validation)
+- server/websiteCrawler.ts (add provenance tracking)
+- server/rankingTracker.ts (detect blocks, don't fabricate data)
+- server/routers.ts (add validation layer before saving)
+- client/src/pages/Report.tsx (add data sources banner)

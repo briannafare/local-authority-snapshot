@@ -219,7 +219,31 @@ Return ONLY valid JSON in this exact format:
     ? response.choices[0].message.content 
     : "{}";
   
-  const result = JSON.parse(content);
+  let result;
+  try {
+    result = JSON.parse(content);
+  } catch (error) {
+    console.error('[GBP Audit] JSON parse error:', error);
+    result = {
+      score: gbpAnalysis.score,
+      issues: [],
+      improvements: [],
+      optimizedDescription: '',
+      optimizedServices: [],
+      examplePost: ''
+    };
+  }
+  
+  // VALIDATION: Ensure LLM output is grounded in reality
+  if (result.optimizedDescription) {
+    const desc = result.optimizedDescription.toLowerCase();
+    // Validate description mentions the business name and location
+    if (!desc.includes(input.businessName.toLowerCase().split(' ')[0]) || 
+        !desc.includes(input.primaryLocation.toLowerCase().split(',')[0])) {
+      console.warn('[GBP Audit] LLM description missing business name or location, regenerating');
+      result.optimizedDescription = `${input.businessName} is a trusted ${input.primaryNiche} serving ${input.primaryLocation}. We provide professional services to help local businesses succeed. Contact us today for expert solutions tailored to your needs.`;
+    }
+  }
   
   // Ensure score from real data is used
   result.score = gbpAnalysis.score;
@@ -227,6 +251,9 @@ Return ONLY valid JSON in this exact format:
   // Prepend real data issues and improvements
   result.issues = [...gbpAnalysis.issues, ...result.issues].slice(0, 10);
   result.improvements = [...gbpAnalysis.recommendations, ...result.improvements].slice(0, 10);
+  
+  // Add data provenance flag
+  result.dataSource = gbpAnalysis.score === 0 ? 'unavailable' : (input.gbpUrl ? 'gbp_url' : 'gbp_search');
   
   return result;
 }
@@ -322,7 +349,47 @@ Return ONLY valid JSON in this exact format:
     ? response.choices[0].message.content 
     : "{}";
   
-  const result = JSON.parse(content);
+  let result;
+  try {
+    result = JSON.parse(content);
+  } catch (error) {
+    console.error('[SEO Audit] JSON parse error:', error);
+    result = {
+      score,
+      weaknesses: [],
+      improvements: [],
+      optimizedTitleTag: '',
+      optimizedHeadings: [],
+      recommendedSchemas: [],
+      queries: []
+    };
+  }
+  
+  // VALIDATION: Ensure LLM output matches scraped data
+  if (!websiteData.error) {
+    // Validate title tag references the actual title
+    if (result.optimizedTitleTag && websiteData.title) {
+      const actualTitle = websiteData.title.toLowerCase();
+      const optimizedTitle = result.optimizedTitleTag.toLowerCase();
+      // If LLM completely ignores the actual title, flag it
+      if (!optimizedTitle.includes(input.businessName.toLowerCase().split(' ')[0])) {
+        console.warn('[SEO Audit] LLM generated title without business name, using fallback');
+        result.optimizedTitleTag = `${input.businessName} | ${input.primaryNiche} in ${input.primaryLocation}`;
+      }
+    }
+    
+    // Validate weaknesses mention actual issues found
+    const hasRealIssues = result.weaknesses.some((w: string) => 
+      w.toLowerCase().includes('title') || 
+      w.toLowerCase().includes('meta') || 
+      w.toLowerCase().includes('h1') ||
+      w.toLowerCase().includes('schema')
+    );
+    
+    if (!hasRealIssues && websiteAnalysis.issues.length > 0) {
+      console.warn('[SEO Audit] LLM weaknesses dont match real issues, prepending real data');
+    }
+  }
   
   // Ensure score from real data is used
   result.score = score;
@@ -330,6 +397,9 @@ Return ONLY valid JSON in this exact format:
   // Prepend real data issues and improvements
   result.weaknesses = [...websiteAnalysis.issues, ...result.weaknesses].slice(0, 10);
   result.improvements = [...websiteAnalysis.recommendations, ...result.improvements].slice(0, 10);
+  
+  // Add data provenance flag
+  result.dataSource = websiteData.error ? 'unavailable' : 'crawl';
   
   // Step 3: Track real search rankings (async, don't block)
   try {

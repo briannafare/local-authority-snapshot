@@ -1,0 +1,8 @@
+{
+  "query": "INSERT INTO audits (businessName, website, primaryLocation, niche, leadSources, runsPaidAds, hasLocalListing, activeSocialMedia, usesAutomation, callCoverage, businessGoals, painPoints, status, createdAt, updatedAt) VALUES ('Black Mountain Plumbing', 'https://blackmountainplumbing.com', 'San Diego, CA', 'plumbing', '[\"Referrals\",\"Google Search\"]', 'yes', 'yes', 'yes', 'no', 'consistent', '[\"Increase lead volume\",\"Improve conversion rate\"]', '[\"Inconsistent lead flow\",\"Poor online visibility\"]', 'processing', NOW(), NOW());",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user gvHM7L26eFEKLxd.root --database hmgSMMSSNJCN2iZZwVjazU --execute INSERT INTO audits (businessName, website, primaryLocation, niche, leadSources, runsPaidAds, hasLocalListing, activeSocialMedia, usesAutomation, callCoverage, businessGoals, painPoints, status, createdAt, updatedAt) VALUES ('Black Mountain Plumbing', 'https://blackmountainplumbing.com', 'San Diego, CA', 'plumbing', '[\"Referrals\",\"Google Search\"]', 'yes', 'yes', 'yes', 'no', 'consistent', '[\"Increase lead volume\",\"Improve conversion rate\"]', '[\"Inconsistent lead flow\",\"Poor online visibility\"]', 'processing', NOW(), NOW());",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1054 (42S22) at line 1: Unknown column 'website' in 'field list'"
+  ]
+}

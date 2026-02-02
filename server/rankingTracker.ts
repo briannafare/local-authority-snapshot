@@ -45,10 +45,23 @@ async function searchGoogle(query: string, location: string): Promise<any> {
       },
     });
 
-    return response.data;
+    // DETECT CAPTCHA/CONSENT PAGES
+    const html = response.data;
+    if (typeof html === 'string') {
+      if (html.includes('Before you continue') || 
+          html.includes('I\'m not a robot') ||
+          html.includes('unusual traffic') ||
+          html.includes('captcha') ||
+          html.includes('consent.google.com')) {
+        console.warn(`[Ranking Tracker] CAPTCHA/consent page detected for "${query}"`);
+        return { blocked: true, html: null };
+      }
+    }
+
+    return { blocked: false, html };
   } catch (error) {
     console.error(`[Ranking Tracker] Failed to search for "${query}":`, error);
-    return null;
+    return { blocked: false, html: null };
   }
 }
 
@@ -157,10 +170,13 @@ export async function trackRankings(
   for (const query of queries) {
     console.log(`[Ranking Tracker] Checking rankings for: "${query}"`);
     
-    const html = await searchGoogle(query, location);
+    const result = await searchGoogle(query, location);
     
-    if (!html) {
-      // If search fails, add placeholder data
+    if (!result || !result.html) {
+      // If search fails or blocked, add placeholder data
+      if (result?.blocked) {
+        console.warn(`[Ranking Tracker] Blocked by CAPTCHA for "${query}" - marking as unavailable`);
+      }
       rankingData.push({
         query,
         position: null,
@@ -171,7 +187,7 @@ export async function trackRankings(
       continue;
     }
 
-    const { position, url, competitors, localPack } = extractRankings(html, domain, businessName);
+    const { position, url, competitors, localPack } = extractRankings(result.html, domain, businessName);
 
     rankingData.push({
       query,

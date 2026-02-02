@@ -133,6 +133,38 @@ export default function Report() {
         </div>
       </header>
 
+      {/* Data Sources Banner */}
+      <div className="bg-blue-50 border-b border-blue-200">
+        <div className="container py-3 max-w-6xl">
+          <div className="flex items-center gap-4 text-sm">
+            <span className="font-semibold text-blue-900">Data Sources:</span>
+            <div className="flex flex-wrap gap-3">
+              {seo?.dataSource && (
+                <Badge variant="outline" className={`
+                  ${seo.dataSource === 'crawl' ? 'bg-green-100 border-green-300 text-green-800' : ''}
+                  ${seo.dataSource === 'unavailable' ? 'bg-red-100 border-red-300 text-red-800' : ''}
+                `}>
+                  {seo.dataSource === 'crawl' ? '✓ Website: Real Data' : '⚠ Website: Unavailable'}
+                </Badge>
+              )}
+              {gbp?.dataSource && (
+                <Badge variant="outline" className={`
+                  ${gbp.dataSource === 'gbp_url' || gbp.dataSource === 'gbp_search' ? 'bg-green-100 border-green-300 text-green-800' : ''}
+                  ${gbp.dataSource === 'unavailable' ? 'bg-red-100 border-red-300 text-red-800' : ''}
+                `}>
+                  {gbp.dataSource !== 'unavailable' ? '✓ GBP: Real Data' : '⚠ GBP: Not Found'}
+                </Badge>
+              )}
+              {seo?.rankingData && (
+                <Badge variant="outline" className="bg-yellow-100 border-yellow-300 text-yellow-800">
+                  ⚠ Rankings: May be blocked by CAPTCHA
+                </Badge>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div className="container py-12 max-w-6xl">
         {/* Title & Executive Summary */}
         <div className="mb-12">
