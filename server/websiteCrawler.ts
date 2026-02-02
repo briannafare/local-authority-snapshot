@@ -71,6 +71,8 @@ export async function crawlWebsite(url: string): Promise<WebsiteData> {
     error: null,
   };
 
+  console.log(`[Website Crawler] Fetching ${url}...`);
+  
   try {
     // Fetch the website HTML
     const response = await axios.get(url, {
@@ -84,6 +86,8 @@ export async function crawlWebsite(url: string): Promise<WebsiteData> {
 
     const html = response.data;
     const $ = cheerio.load(html);
+    
+    console.log(`[Website Crawler] Successfully fetched ${url}, HTML length: ${html.length}`);
 
     // Extract title
     result.title = $("title").first().text().trim() || null;
@@ -238,8 +242,18 @@ export async function crawlWebsite(url: string): Promise<WebsiteData> {
       $('meta[property="og:description"]').attr("content")?.trim() || null;
     result.openGraphData.image = $('meta[property="og:image"]').attr("content")?.trim() || null;
 
+    console.log(`[Website Crawler] Extracted data from ${url}:`, {
+      title: result.title,
+      h1Count: result.h1Tags.length,
+      h2Count: result.h2Tags.length,
+      schemaCount: result.schemaTypes.length,
+      hasChat: result.hasChat,
+      ctaButtons: result.ctaElements.buttons,
+    });
+    
     return result;
   } catch (error: any) {
+    console.error(`[Website Crawler] Error fetching ${url}:`, error.message);
     result.error = error.message || "Failed to crawl website";
     return result;
   }

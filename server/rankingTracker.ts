@@ -136,6 +136,7 @@ export async function trackRankings(
   location: string,
   niche: string
 ): Promise<RankingResult> {
+  console.log('[Ranking Tracker] Starting ranking analysis for:', businessName);
   const domain = new URL(websiteUrl).hostname;
 
   // Generate relevant search queries
@@ -204,6 +205,8 @@ export async function trackRankings(
 
   const averagePosition = rankedQueries > 0 ? Math.round(totalPosition / rankedQueries) : null;
   const topCompetitors = Array.from(topCompetitorsSet).slice(0, 5);
+  
+  console.log('[Ranking Tracker] Complete. Queries:', rankingData.length, 'Avg position:', averagePosition, 'In local pack:', inLocalPack);
 
   return {
     queries: rankingData,

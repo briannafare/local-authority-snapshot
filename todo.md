@@ -199,3 +199,32 @@
 - [x] Update routers.ts to fetch visual URLs from database
 - [ ] Test PDF generation with new charts
 - [ ] Verify PDF layout and image quality
+
+
+## CRITICAL BUGS (User Report #2)
+
+### Data Collection Not Working
+- [ ] Debug why website crawler returns no real data
+- [ ] Debug why GBP scraper returns empty results
+- [ ] Debug why ranking tracker returns no positions
+- [ ] Check if axios requests are failing
+- [ ] Add error logging to all scraping functions
+
+### Chart Generation Failing
+- [ ] Fix matplotlib "module not found" error (still occurring)
+- [ ] Verify matplotlib is installed in correct Python environment
+- [ ] Test generateVisuals.py script directly
+- [ ] Check if visual generation is being called during audit
+- [ ] Verify chart files are being saved and uploaded to S3
+
+### PDF Download Not Working
+- [ ] Debug PDF generation mutation error
+- [ ] Check if manus-md-to-pdf is working correctly
+- [ ] Verify PDF is being uploaded to S3
+- [ ] Test PDF download button functionality
+
+### Report Display Issues
+- [ ] Verify audit data is being saved to database
+- [ ] Check if report is fetching correct audit data
+- [ ] Ensure visuals array is populated
+- [ ] Test report rendering with sample data
