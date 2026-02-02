@@ -1,7 +1,11 @@
+import { useState } from "react";
 import { useParams, useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { 
@@ -16,13 +20,27 @@ import {
   Zap
 } from "lucide-react";
 import { toast } from "sonner";
+import { GBPScoreChart, RankingsChart, WebsiteAnalysisChart, CompetitorChart, ROIProjectionChart } from "@/components/AuditCharts";
 
 export default function Report() {
   const params = useParams();
   const [, setLocation] = useLocation();
   const auditId = parseInt(params.id || "0");
+  const [emailDialogOpen, setEmailDialogOpen] = useState(false);
+  const [emailInput, setEmailInput] = useState("");
 
   const { data: audit, isLoading, error } = trpc.audits.getById.useQuery({ id: auditId });
+
+  const sendEmailMutation = trpc.audits.sendEmail.useMutation({
+    onSuccess: () => {
+      toast.success("Report sent successfully! Check your inbox.");
+      setEmailDialogOpen(false);
+      setEmailInput("");
+    },
+    onError: (error) => {
+      toast.error(`Failed to send email: ${error.message}`);
+    },
+  });
 
   const generatePDFMutation = trpc.audits.generatePDF.useMutation({
     onSuccess: (data) => {
@@ -115,7 +133,7 @@ export default function Report() {
               </div>
             </div>
             <div className="flex gap-2">
-              <Button variant="outline" onClick={() => toast.info("Email feature coming soon")}>
+              <Button variant="outline" onClick={() => setEmailDialogOpen(true)}>
                 <Mail className="w-4 h-4 mr-2" /> Email Report
               </Button>
               <Button 
@@ -290,6 +308,17 @@ export default function Report() {
             </Card>
           )}
 
+          {/* GBP Score Chart */}
+          {gbp && gbp.score && (
+            <div className="mb-6">
+              <GBPScoreChart 
+                score={gbp.score} 
+                issues={gbp.issues || []} 
+                improvements={gbp.improvements || []} 
+              />
+            </div>
+          )}
+
           {/* SEO Details */}
           {seo && (
             <Card className="mb-6 border-0 shadow-lg">
@@ -422,6 +451,13 @@ export default function Report() {
                         </div>
                       </div>
                     )}
+
+                    {/* Rankings Chart */}
+                    {seo.rankingData && seo.rankingData.queries && seo.rankingData.queries.length > 0 && (
+                      <div className="mt-6">
+                        <RankingsChart rankings={seo.rankingData.queries.map((q: any) => ({ keyword: q.query, position: q.position }))} />
+                      </div>
+                    )}
                   </div>
                 )}
 
@@ -530,6 +566,18 @@ export default function Report() {
                 )}
               </CardContent>
             </Card>
+          )}
+
+          {/* Website Analysis Chart */}
+          {seo && seo.score && (
+            <div className="mb-6">
+              <WebsiteAnalysisChart 
+                seoScore={seo.score || 0}
+                technicalScore={seo.technicalScore || seo.score || 0}
+                contentScore={seo.contentScore || seo.score || 0}
+                localScore={seo.localScore || seo.score || 0}
+              />
+            </div>
           )}
 
           {/* AEO Details */}
@@ -691,6 +739,17 @@ export default function Report() {
               )}
             </CardContent>
           </Card>
+        )}
+
+        {/* ROI Projection Chart */}
+        {audit.monthlyLeads && audit.avgRevenuePerClient && (
+          <div className="mb-12">
+            <ROIProjectionChart 
+              currentLeads={audit.monthlyLeads || 10}
+              projectedLeads={Math.round((audit.monthlyLeads || 10) * 1.5)} // 50% increase projection
+              avgRevenue={audit.avgRevenuePerClient || 5000}
+            />
+          </div>
         )}
 
         {/* Revenue Recapture Summary */}
@@ -856,6 +915,58 @@ export default function Report() {
           <p className="text-sm">Your marketing runs itself. Your revenue doesn't sleep.</p>
         </div>
       </footer>
+
+      {/* Email Dialog */}
+      <Dialog open={emailDialogOpen} onOpenChange={setEmailDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Email Your Report</DialogTitle>
+            <DialogDescription>
+              Enter your email address to receive a copy of your audit report.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <Label htmlFor="email">Email Address</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="your@email.com"
+                value={emailInput}
+                onChange={(e) => setEmailInput(e.target.value)}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setEmailDialogOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={() => {
+                if (emailInput && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailInput)) {
+                  sendEmailMutation.mutate({ auditId: audit.id, email: emailInput });
+                } else {
+                  toast.error("Please enter a valid email address");
+                }
+              }}
+              disabled={sendEmailMutation.isPending}
+            >
+              {sendEmailMutation.isPending ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" /> Sending...
+                </>
+              ) : (
+                <>
+                  <Mail className="w-4 h-4 mr-2" /> Send Report
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

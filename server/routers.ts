@@ -81,6 +81,22 @@ export const appRouter = router({
           .set({ pdfUrl })
           .where(eq(audits.id, input.auditId));
 
+        // Send email if user provided email address
+        if (audit.emailSent) {
+          const { sendAuditReportEmail } = await import("./emailService");
+          const emailSent = await sendAuditReportEmail(
+            audit.emailSent,
+            audit.businessName,
+            pdfUrl
+          );
+          
+          if (emailSent) {
+            console.log(`[Email] Audit report sent to ${audit.emailSent}`);
+          } else {
+            console.error(`[Email] Failed to send audit report to ${audit.emailSent}`);
+          }
+        }
+
         return { pdfUrl };
       }),
 
@@ -104,6 +120,7 @@ export const appRouter = router({
           avgRevenuePerClient: z.number().optional(),
           businessGoals: z.array(z.string()),
           painPoints: z.array(z.string()),
+          email: z.string().email().optional().or(z.literal("")),
         })
       )
       .mutation(async ({ input }) => {
@@ -127,6 +144,7 @@ export const appRouter = router({
           avgRevenuePerClient: input.avgRevenuePerClient || null,
           businessGoals: JSON.stringify(input.businessGoals),
           painPoints: JSON.stringify(input.painPoints),
+          emailSent: input.email || null,
           status: "processing",
         });
 
@@ -179,6 +197,40 @@ export const appRouter = router({
       .query(async ({ input }) => {
         const { getAuditById } = await import("./db");
         return await getAuditById(input.id);
+      }),
+    
+    sendEmail: publicProcedure
+      .input(
+        z.object({
+          auditId: z.number(),
+          email: z.string().email(),
+        })
+      )
+      .mutation(async ({ input }) => {
+        const { getAuditById } = await import("./db");
+        const { sendAuditReportEmail } = await import("./emailService");
+        
+        const audit = await getAuditById(input.auditId);
+        
+        if (!audit) {
+          throw new Error("Audit not found");
+        }
+        
+        if (!audit.pdfUrl) {
+          throw new Error("PDF not yet generated");
+        }
+        
+        const success = await sendAuditReportEmail(
+          input.email,
+          audit.businessName,
+          audit.pdfUrl
+        );
+        
+        if (!success) {
+          throw new Error("Failed to send email");
+        }
+        
+        return { success: true };
       }),
   }),
 });

@@ -39,6 +39,7 @@ const step2Schema = z.object({
 const step3Schema = z.object({
   businessGoals: z.array(z.string()).min(1, "Select at least one goal"),
   painPoints: z.array(z.string()).min(1, "Select at least one pain point"),
+  email: z.string().email("Invalid email address").optional().or(z.literal("")),
 });
 
 type Step1Data = z.infer<typeof step1Schema>;
@@ -487,6 +488,7 @@ function Step3Form({
   isSubmitting: boolean;
 }) {
   const {
+    register,
     handleSubmit,
     setValue,
     watch,
@@ -565,6 +567,20 @@ function Step3Form({
           ))}
         </div>
         {errors.painPoints && <p className="text-sm text-red-500 mt-1">{errors.painPoints.message}</p>}
+      </div>
+
+      <div>
+        <Label htmlFor="email">Email address (optional)</Label>
+        <Input
+          id="email"
+          type="email"
+          placeholder="your@email.com"
+          {...register("email")}
+        />
+        <p className="text-xs text-gray-500 mt-1">
+          Receive your audit report via email when it's ready
+        </p>
+        {errors.email && <p className="text-sm text-red-500 mt-1">{errors.email.message}</p>}
       </div>
 
       <div className="bg-teal-50 border border-teal-200 rounded-lg p-4">

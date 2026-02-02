@@ -332,3 +332,20 @@
 - [ ] Create serpstack.ts module for API calls
 - [ ] Update rankingTracker.ts to use SerpStack instead of direct Google scraping
 - [ ] Test with real business to verify ranking data
+
+## Phase 16: Display Charts in Web Report
+
+- [x] Add chart rendering library (Recharts) to display visual charts inline
+- [x] Create chart components for the 5 analysis charts (GBP, Rankings, Website, Competitors, ROI)
+- [x] Integrate charts into the web report view (not just PDF)
+- [x] Ensure charts are responsive and look good on all screen sizes
+- [ ] Test chart display with real data
+
+## Phase 17: Email Delivery System
+
+- [x] Add email input field to audit form (optional)
+- [x] Create email service module using Gmail MCP
+- [x] Implement email template for audit report delivery
+- [x] Add email sending functionality to audit completion flow (after PDF generation)
+- [ ] Test email delivery with real email address
+- [x] Update "Email Report" button in Report page to functional implementation (with dialog)
