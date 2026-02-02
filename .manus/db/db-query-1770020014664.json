@@ -1,0 +1,140 @@
+{
+  "query": "SELECT id, businessName, status FROM audits ORDER BY id DESC;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user gvHM7L26eFEKLxd.root --database hmgSMMSSNJCN2iZZwVjazU --execute SELECT id, businessName, status FROM audits ORDER BY id DESC;",
+  "rows": [
+    {
+      "id": "120001",
+      "businessName": "Joes Pizza",
+      "status": "processing"
+    },
+    {
+      "id": "90001",
+      "businessName": "Lombardi's Pizza",
+      "status": "processing"
+    },
+    {
+      "id": "60015",
+      "businessName": "eighty5labs",
+      "status": "completed"
+    },
+    {
+      "id": "60014",
+      "businessName": "eighty5labs",
+      "status": "completed"
+    },
+    {
+      "id": "60013",
+      "businessName": "eighty5labs",
+      "status": "completed"
+    },
+    {
+      "id": "60012",
+      "businessName": "eighty5labs",
+      "status": "completed"
+    },
+    {
+      "id": "60011",
+      "businessName": "eighty5labs",
+      "status": "completed"
+    },
+    {
+      "id": "60010",
+      "businessName": "eighty5labs",
+      "status": "completed"
+    },
+    {
+      "id": "60009",
+      "businessName": "eighty5labs",
+      "status": "completed"
+    },
+    {
+      "id": "60008",
+      "businessName": "eighty5labs",
+      "status": "completed"
+    },
+    {
+      "id": "60007",
+      "businessName": "eighty5labs",
+      "status": "completed"
+    },
+    {
+      "id": "60006",
+      "businessName": "eighty5labs",
+      "status": "failed"
+    },
+    {
+      "id": "60005",
+      "businessName": "eighty5labs",
+      "status": "completed"
+    },
+    {
+      "id": "60004",
+      "businessName": "eighty5labs",
+      "status": "completed"
+    },
+    {
+      "id": "60003",
+      "businessName": "eighty5labs",
+      "status": "completed"
+    },
+    {
+      "id": "60002",
+      "businessName": "eighty5labs",
+      "status": "completed"
+    },
+    {
+      "id": "60001",
+      "businessName": "Test Business",
+      "status": "completed"
+    },
+    {
+      "id": "30005",
+      "businessName": "The Lindley Team at Mortgage Express",
+      "status": "completed"
+    },
+    {
+      "id": "30004",
+      "businessName": "Get By ID Test",
+      "status": "processing"
+    },
+    {
+      "id": "30003",
+      "businessName": "Revenue Test Business",
+      "status": "processing"
+    },
+    {
+      "id": "30002",
+      "businessName": "Minimal Test Business",
+      "status": "processing"
+    },
+    {
+      "id": "30001",
+      "businessName": "Test HVAC Company",
+      "status": "processing"
+    },
+    {
+      "id": "4",
+      "businessName": "Get By ID Test",
+      "status": "processing"
+    },
+    {
+      "id": "3",
+      "businessName": "Revenue Test Business",
+      "status": "processing"
+    },
+    {
+      "id": "2",
+      "businessName": "Minimal Test Business",
+      "status": "processing"
+    },
+    {
+      "id": "1",
+      "businessName": "Test HVAC Company",
+      "status": "processing"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tbusinessName\tstatus\n120001\tJoes Pizza\tprocessing\n90001\tLombardi's Pizza\tprocessing\n60015\teighty5labs\tcompleted\n60014\teighty5labs\tcompleted\n60013\teighty5labs\tcompleted\n60012\teighty5labs\tcompleted\n60011\teighty5labs\tcompleted\n60010\teighty5labs\tcompleted\n60009\teighty5labs\tcompleted\n60008\teighty5labs\tcompleted\n60007\teighty5labs\tcompleted\n60006\teighty5labs\tfailed\n60005\teighty5labs\tcompleted\n60004\teighty5labs\tcompleted\n60003\teighty5labs\tcompleted\n60002\teighty5labs\tcompleted\n60001\tTest Business\tcompleted\n30005\tThe Lindley Team at Mortgage Express\tcompleted\n30004\tGet By ID Test\tprocessing\n30003\tRevenue Test Business\tprocessing\n30002\tMinimal Test Business\tprocessing\n30001\tTest HVAC Company\tprocessing\n4\tGet By ID Test\tprocessing\n3\tRevenue Test Business\tprocessing\n2\tMinimal Test Business\tprocessing\n1\tTest HVAC Company\tprocessing\n",
+  "stderr": "",
+  "execution_time_ms": 61
+}

@@ -1,0 +1,16 @@
+{
+  "query": "SELECT id, businessName, status, createdAt FROM audits WHERE businessName LIKE \"%Joe's Pizza%\" ORDER BY createdAt DESC LIMIT 5;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user gvHM7L26eFEKLxd.root --database hmgSMMSSNJCN2iZZwVjazU --execute SELECT id, businessName, status, createdAt FROM audits WHERE businessName LIKE \"%Joe's Pizza%\" ORDER BY createdAt DESC LIMIT 5;",
+  "rows": [
+    {
+      "id": "150001",
+      "businessName": "Joe's Pizza NYC",
+      "status": "processing",
+      "createdAt": "2026-02-02 21:54:41"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tbusinessName\tstatus\tcreatedAt\n150001\tJoe's Pizza NYC\tprocessing\t2026-02-02 21:54:41\n",
+  "stderr": "",
+  "execution_time_ms": 60
+}

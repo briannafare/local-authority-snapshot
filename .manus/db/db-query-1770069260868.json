@@ -1,0 +1,106 @@
+{
+  "query": "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'audits' ORDER BY ORDINAL_POSITION;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user gvHM7L26eFEKLxd.root --database hmgSMMSSNJCN2iZZwVjazU --execute SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'audits' ORDER BY ORDINAL_POSITION;",
+  "rows": [
+    {
+      "COLUMN_NAME": "id"
+    },
+    {
+      "COLUMN_NAME": "businessName"
+    },
+    {
+      "COLUMN_NAME": "websiteUrl"
+    },
+    {
+      "COLUMN_NAME": "primaryLocation"
+    },
+    {
+      "COLUMN_NAME": "primaryNiche"
+    },
+    {
+      "COLUMN_NAME": "nicheDescription"
+    },
+    {
+      "COLUMN_NAME": "leadSources"
+    },
+    {
+      "COLUMN_NAME": "runsPaidAds"
+    },
+    {
+      "COLUMN_NAME": "hasLocalListing"
+    },
+    {
+      "COLUMN_NAME": "activeOnSocial"
+    },
+    {
+      "COLUMN_NAME": "usesAutomation"
+    },
+    {
+      "COLUMN_NAME": "hasCallCoverage"
+    },
+    {
+      "COLUMN_NAME": "monthlyVisitors"
+    },
+    {
+      "COLUMN_NAME": "monthlyLeads"
+    },
+    {
+      "COLUMN_NAME": "avgRevenuePerClient"
+    },
+    {
+      "COLUMN_NAME": "businessGoals"
+    },
+    {
+      "COLUMN_NAME": "painPoints"
+    },
+    {
+      "COLUMN_NAME": "gbpAuditResults"
+    },
+    {
+      "COLUMN_NAME": "seoAuditResults"
+    },
+    {
+      "COLUMN_NAME": "competitiveResults"
+    },
+    {
+      "COLUMN_NAME": "aeoResults"
+    },
+    {
+      "COLUMN_NAME": "leadCaptureResults"
+    },
+    {
+      "COLUMN_NAME": "followUpResults"
+    },
+    {
+      "COLUMN_NAME": "executiveSummary"
+    },
+    {
+      "COLUMN_NAME": "keyFindings"
+    },
+    {
+      "COLUMN_NAME": "recommendations"
+    },
+    {
+      "COLUMN_NAME": "status"
+    },
+    {
+      "COLUMN_NAME": "pdfUrl"
+    },
+    {
+      "COLUMN_NAME": "emailSent"
+    },
+    {
+      "COLUMN_NAME": "createdAt"
+    },
+    {
+      "COLUMN_NAME": "updatedAt"
+    },
+    {
+      "COLUMN_NAME": "gbpUrl"
+    }
+  ],
+  "messages": [],
+  "stdout": "COLUMN_NAME\nid\nbusinessName\nwebsiteUrl\nprimaryLocation\nprimaryNiche\nnicheDescription\nleadSources\nrunsPaidAds\nhasLocalListing\nactiveOnSocial\nusesAutomation\nhasCallCoverage\nmonthlyVisitors\nmonthlyLeads\navgRevenuePerClient\nbusinessGoals\npainPoints\ngbpAuditResults\nseoAuditResults\ncompetitiveResults\naeoResults\nleadCaptureResults\nfollowUpResults\nexecutiveSummary\nkeyFindings\nrecommendations\nstatus\npdfUrl\nemailSent\ncreatedAt\nupdatedAt\ngbpUrl\n",
+  "stderr": "",
+  "execution_time_ms": 201
+}

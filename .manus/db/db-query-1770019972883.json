@@ -1,0 +1,40 @@
+{
+  "query": "SELECT id, businessName, status, createdAt FROM audits ORDER BY createdAt DESC LIMIT 5;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user gvHM7L26eFEKLxd.root --database hmgSMMSSNJCN2iZZwVjazU --execute SELECT id, businessName, status, createdAt FROM audits ORDER BY createdAt DESC LIMIT 5;",
+  "rows": [
+    {
+      "id": "120001",
+      "businessName": "Joes Pizza",
+      "status": "processing",
+      "createdAt": "2026-02-02 07:29:08"
+    },
+    {
+      "id": "90001",
+      "businessName": "Lombardi's Pizza",
+      "status": "processing",
+      "createdAt": "2026-02-02 06:55:32"
+    },
+    {
+      "id": "60015",
+      "businessName": "eighty5labs",
+      "status": "completed",
+      "createdAt": "2026-02-02 06:28:50"
+    },
+    {
+      "id": "60014",
+      "businessName": "eighty5labs",
+      "status": "completed",
+      "createdAt": "2026-02-02 06:25:11"
+    },
+    {
+      "id": "60013",
+      "businessName": "eighty5labs",
+      "status": "completed",
+      "createdAt": "2026-02-02 06:21:34"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tbusinessName\tstatus\tcreatedAt\n120001\tJoes Pizza\tprocessing\t2026-02-02 07:29:08\n90001\tLombardi's Pizza\tprocessing\t2026-02-02 06:55:32\n60015\teighty5labs\tcompleted\t2026-02-02 06:28:50\n60014\teighty5labs\tcompleted\t2026-02-02 06:25:11\n60013\teighty5labs\tcompleted\t2026-02-02 06:21:34\n",
+  "stderr": "",
+  "execution_time_ms": 145
+}

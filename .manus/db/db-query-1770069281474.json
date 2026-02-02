@@ -1,0 +1,13 @@
+{
+  "query": "INSERT INTO audits (\n  businessName, websiteUrl, primaryLocation, primaryNiche, leadSources,\n  runsPaidAds, hasLocalListing, activeOnSocial, usesAutomation,\n  hasCallCoverage, monthlyVisitors, monthlyLeads, avgRevenuePerClient,\n  businessGoals, painPoints, emailSent, status, createdAt\n) VALUES (\n  \"Joe's Pizza NYC\",\n  \"https://joespizzanyc.com\",\n  \"New York, NY\",\n  \"Restaurant / Local Retail\",\n  '[\"Walk-ins\",\"Google Search\"]',\n  \"No\",\n  \"Yes\",\n  \"No\",\n  \"No\",\n  \"Yes\",\n  1000,\n  150,\n  25,\n  '[\"More local customers\",\"Better online presence\"]',\n  '[\"Not enough walk-in traffic\",\"Hard to track ROI\"]',\n  \"demo@test.com\",\n  \"processing\",\n  NOW()\n);\nSELECT LAST_INSERT_ID() as audit_id;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user gvHM7L26eFEKLxd.root --database hmgSMMSSNJCN2iZZwVjazU --execute INSERT INTO audits (\n  businessName, websiteUrl, primaryLocation, primaryNiche, leadSources,\n  runsPaidAds, hasLocalListing, activeOnSocial, usesAutomation,\n  hasCallCoverage, monthlyVisitors, monthlyLeads, avgRevenuePerClient,\n  businessGoals, painPoints, emailSent, status, createdAt\n) VALUES (\n  \"Joe's Pizza NYC\",\n  \"https://joespizzanyc.com\",\n  \"New York, NY\",\n  \"Restaurant / Local Retail\",\n  '[\"Walk-ins\",\"Google Search\"]',\n  \"No\",\n  \"Yes\",\n  \"No\",\n  \"No\",\n  \"Yes\",\n  1000,\n  150,\n  25,\n  '[\"More local customers\",\"Better online presence\"]',\n  '[\"Not enough walk-in traffic\",\"Hard to track ROI\"]',\n  \"demo@test.com\",\n  \"processing\",\n  NOW()\n);\nSELECT LAST_INSERT_ID() as audit_id;",
+  "rows": [
+    {
+      "audit_id": "150001"
+    }
+  ],
+  "messages": [],
+  "stdout": "audit_id\n150001\n",
+  "stderr": "",
+  "execution_time_ms": 82
+}

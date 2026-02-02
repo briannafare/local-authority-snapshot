@@ -1,0 +1,14 @@
+{
+  "query": "SELECT id, businessName FROM audits WHERE status = 'completed' LIMIT 1;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user gvHM7L26eFEKLxd.root --database hmgSMMSSNJCN2iZZwVjazU --execute SELECT id, businessName FROM audits WHERE status = 'completed' LIMIT 1;",
+  "rows": [
+    {
+      "id": "30005",
+      "businessName": "The Lindley Team at Mortgage Express"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tbusinessName\n30005\tThe Lindley Team at Mortgage Express\n",
+  "stderr": "",
+  "execution_time_ms": 68
+}

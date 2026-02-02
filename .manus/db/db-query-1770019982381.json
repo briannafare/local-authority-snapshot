@@ -1,0 +1,31 @@
+{
+  "query": "SELECT id, businessName, status, websiteUrl, primaryLocation FROM audits WHERE status = 'completed' ORDER BY createdAt DESC LIMIT 3;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user gvHM7L26eFEKLxd.root --database hmgSMMSSNJCN2iZZwVjazU --execute SELECT id, businessName, status, websiteUrl, primaryLocation FROM audits WHERE status = 'completed' ORDER BY createdAt DESC LIMIT 3;",
+  "rows": [
+    {
+      "id": "60015",
+      "businessName": "eighty5labs",
+      "status": "completed",
+      "websiteUrl": "https://eighty5labs.com",
+      "primaryLocation": "San Diego, CA"
+    },
+    {
+      "id": "60014",
+      "businessName": "eighty5labs",
+      "status": "completed",
+      "websiteUrl": "https://eighty5labs.com",
+      "primaryLocation": "San Diego, CA"
+    },
+    {
+      "id": "60013",
+      "businessName": "eighty5labs",
+      "status": "completed",
+      "websiteUrl": "https://eighty5labs.com",
+      "primaryLocation": "San Diego, CA"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tbusinessName\tstatus\twebsiteUrl\tprimaryLocation\n60015\teighty5labs\tcompleted\thttps://eighty5labs.com\tSan Diego, CA\n60014\teighty5labs\tcompleted\thttps://eighty5labs.com\tSan Diego, CA\n60013\teighty5labs\tcompleted\thttps://eighty5labs.com\tSan Diego, CA\n",
+  "stderr": "",
+  "execution_time_ms": 59
+}
