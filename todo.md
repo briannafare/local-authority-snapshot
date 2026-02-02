@@ -261,7 +261,7 @@
 - [x] Verify visual charts are generated and displayed correctly
 - [x] Test PDF download functionality with embedded images (5 charts confirmed in PDF)
 - [x] Fix PDF image embedding (filename matching, local paths, markdown filters)
-- [ ] Fix form validation issue (lead sources not persisting in UI)
+- [x] Fix form validation issue (lead sources not persisting in UI) - Added shouldValidate and shouldDirty options to setValue calls in toggle functions
 
 ## Phase 15: Complete Next Steps (User Request)
 
@@ -315,15 +315,15 @@
 
 ## 🔧 PROPER FIX - Real Data Integration (In Progress)
 
-- [ ] Integrate Google Places API for real GBP data (replace screen scraping)
-- [ ] Integrate SerpAPI for real ranking data (replace blocked Google scraping)
-- [ ] Add validation layer to ensure LLM outputs match scraped data
-- [ ] Implement data provenance tracking throughout the system
-- [ ] Rewrite LLM prompts to constrain speculation and enforce facts
-- [ ] Fix form validation bug (lead source checkboxes)
-- [ ] Display visual charts inline in web report
-- [ ] Test with real business and verify all data is accurate
-- [ ] Document API costs and usage limits
+- [x] Integrate Google Places API for real GBP data (replace screen scraping)
+- [x] Integrate SerpStack API for real ranking data (replace blocked Google scraping)
+- [x] Add validation layer to ensure LLM outputs match scraped data
+- [x] Implement data provenance tracking throughout the system
+- [x] Rewrite LLM prompts to constrain speculation and enforce facts
+- [x] Fix form validation bug (lead source checkboxes) - Added shouldValidate and shouldDirty to toggle functions
+- [ ] Display visual charts inline in web report (charts only show in PDF currently)
+- [ ] Test with real business and verify all data is accurate (Joe's Pizza test in progress)
+- [x] Document API costs and usage limits (Google Places: free tier, SerpStack: 100 searches/month free)
 
 
 ## 🔧 SerpStack Integration (In Progress)

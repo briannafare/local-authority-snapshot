@@ -307,19 +307,25 @@ function Step2Form({
   const leadSources = watch("leadSources") || [];
 
   const toggleLeadSource = (source: string) => {
-    const current = leadSources;
+    const current = leadSources || [];
     if (current.includes(source)) {
       setValue(
         "leadSources",
-        current.filter((s) => s !== source)
+        current.filter((s) => s !== source),
+        { shouldValidate: true, shouldDirty: true }
       );
     } else {
-      setValue("leadSources", [...current, source]);
+      setValue("leadSources", [...current, source], { shouldValidate: true, shouldDirty: true });
     }
   };
 
   return (
-    <form onSubmit={handleSubmit(onNext)} className="space-y-6">
+    <form onSubmit={handleSubmit((data) => {
+      console.log('Step 2 form data:', data);
+      onNext(data);
+    }, (errors) => {
+      console.log('Step 2 form validation errors:', errors);
+    })} className="space-y-6">
       <div>
         <Label>Main ways you currently get clients *</Label>
         <div className="grid grid-cols-2 gap-2 mt-2">
@@ -498,26 +504,28 @@ function Step3Form({
   const painPoints = watch("painPoints") || [];
 
   const toggleGoal = (goal: string) => {
-    const current = businessGoals;
+    const current = businessGoals || [];
     if (current.includes(goal)) {
       setValue(
         "businessGoals",
-        current.filter((g) => g !== goal)
+        current.filter((g) => g !== goal),
+        { shouldValidate: true, shouldDirty: true }
       );
     } else {
-      setValue("businessGoals", [...current, goal]);
+      setValue("businessGoals", [...current, goal], { shouldValidate: true, shouldDirty: true });
     }
   };
 
   const togglePainPoint = (point: string) => {
-    const current = painPoints;
+    const current = painPoints || [];
     if (current.includes(point)) {
       setValue(
         "painPoints",
-        current.filter((p) => p !== point)
+        current.filter((p) => p !== point),
+        { shouldValidate: true, shouldDirty: true }
       );
     } else {
-      setValue("painPoints", [...current, point]);
+      setValue("painPoints", [...current, point], { shouldValidate: true, shouldDirty: true });
     }
   };
 
