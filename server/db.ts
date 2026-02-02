@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users } from "../drizzle/schema";
+import { InsertUser, users, audits, InsertAudit, auditVisuals, InsertAuditVisual } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -89,4 +89,49 @@ export async function getUserByOpenId(openId: string) {
   return result.length > 0 ? result[0] : undefined;
 }
 
-// TODO: add feature queries here as your schema grows.
+// Audit queries
+export async function createAudit(audit: InsertAudit) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const result = await db.insert(audits).values(audit);
+  return result[0].insertId;
+}
+
+export async function getAuditById(id: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  
+  const result = await db.select().from(audits).where(eq(audits.id, id)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function updateAudit(id: number, data: Partial<InsertAudit>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  await db.update(audits).set(data).where(eq(audits.id, id));
+}
+
+export async function getAllAudits() {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return await db.select().from(audits).orderBy(audits.createdAt);
+}
+
+// Audit visuals queries
+export async function createAuditVisual(visual: InsertAuditVisual) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const result = await db.insert(auditVisuals).values(visual);
+  return result[0].insertId;
+}
+
+export async function getAuditVisuals(auditId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return await db.select().from(auditVisuals).where(eq(auditVisuals.auditId, auditId));
+}

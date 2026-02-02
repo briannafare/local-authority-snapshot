@@ -25,4 +25,70 @@ export const users = mysqlTable("users", {
 export type User = typeof users.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;
 
-// TODO: Add your tables here
+/**
+ * Audits table - stores business information and audit metadata
+ */
+export const audits = mysqlTable("audits", {
+  id: int("id").autoincrement().primaryKey(),
+  // Business basics
+  businessName: varchar("businessName", { length: 255 }).notNull(),
+  websiteUrl: varchar("websiteUrl", { length: 512 }).notNull(),
+  primaryLocation: varchar("primaryLocation", { length: 255 }).notNull(),
+  primaryNiche: varchar("primaryNiche", { length: 100 }).notNull(),
+  nicheDescription: text("nicheDescription"),
+  
+  // Current marketing operations (stored as JSON)
+  leadSources: text("leadSources"), // JSON array
+  runsPaidAds: varchar("runsPaidAds", { length: 20 }),
+  hasLocalListing: varchar("hasLocalListing", { length: 20 }),
+  activeOnSocial: varchar("activeOnSocial", { length: 20 }),
+  usesAutomation: varchar("usesAutomation", { length: 20 }),
+  hasCallCoverage: varchar("hasCallCoverage", { length: 20 }),
+  monthlyVisitors: int("monthlyVisitors"),
+  monthlyLeads: int("monthlyLeads"),
+  avgRevenuePerClient: int("avgRevenuePerClient"),
+  
+  // Goals and pain points
+  businessGoals: text("businessGoals"), // JSON array
+  painPoints: text("painPoints"), // JSON array
+  
+  // Audit results (stored as JSON for flexibility)
+  gbpAuditResults: text("gbpAuditResults"), // JSON object
+  seoAuditResults: text("seoAuditResults"), // JSON object
+  competitiveResults: text("competitiveResults"), // JSON object
+  aeoResults: text("aeoResults"), // JSON object
+  leadCaptureResults: text("leadCaptureResults"), // JSON object
+  followUpResults: text("followUpResults"), // JSON object
+  
+  // Generated content
+  executiveSummary: text("executiveSummary"),
+  keyFindings: text("keyFindings"), // JSON array
+  recommendations: text("recommendations"), // JSON object
+  
+  // Status and metadata
+  status: mysqlEnum("status", ["pending", "processing", "completed", "failed"]).default("pending").notNull(),
+  pdfUrl: varchar("pdfUrl", { length: 512 }),
+  emailSent: varchar("emailSent", { length: 255 }),
+  
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Audit = typeof audits.$inferSelect;
+export type InsertAudit = typeof audits.$inferInsert;
+
+/**
+ * Audit visuals table - stores generated charts and infographics
+ */
+export const auditVisuals = mysqlTable("auditVisuals", {
+  id: int("id").autoincrement().primaryKey(),
+  auditId: int("auditId").notNull(),
+  visualType: varchar("visualType", { length: 100 }).notNull(), // e.g., "gbp_score_chart", "seo_metrics_card"
+  imageUrl: varchar("imageUrl", { length: 512 }).notNull(),
+  s3Key: varchar("s3Key", { length: 512 }).notNull(),
+  description: text("description"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type AuditVisual = typeof auditVisuals.$inferSelect;
+export type InsertAuditVisual = typeof auditVisuals.$inferInsert;

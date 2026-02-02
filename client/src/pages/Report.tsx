@@ -1,0 +1,656 @@
+import { useParams, useLocation } from "wouter";
+import { trpc } from "@/lib/trpc";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
+import { 
+  Loader2, 
+  Download, 
+  Mail, 
+  ArrowLeft, 
+  CheckCircle2, 
+  TrendingUp,
+  AlertCircle,
+  Target,
+  Zap
+} from "lucide-react";
+import { toast } from "sonner";
+
+export default function Report() {
+  const params = useParams();
+  const [, setLocation] = useLocation();
+  const auditId = parseInt(params.id || "0");
+
+  const { data: audit, isLoading, error } = trpc.audits.getById.useQuery({ id: auditId });
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-teal-50 flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="w-12 h-12 animate-spin text-orange-500 mx-auto mb-4" />
+          <h2 className="text-2xl font-bold mb-2">Generating Your Audit...</h2>
+          <p className="text-gray-600">
+            We're analyzing your business across 6 dimensions. This may take 1-2 minutes.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !audit) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-teal-50 flex items-center justify-center">
+        <div className="text-center">
+          <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
+          <h2 className="text-2xl font-bold mb-2">Audit Not Found</h2>
+          <p className="text-gray-600 mb-4">We couldn't find the audit you're looking for.</p>
+          <Button onClick={() => setLocation("/")}>Go Home</Button>
+        </div>
+      </div>
+    );
+  }
+
+  if (audit.status === "processing") {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-teal-50 flex items-center justify-center">
+        <div className="text-center max-w-md">
+          <Loader2 className="w-12 h-12 animate-spin text-orange-500 mx-auto mb-4" />
+          <h2 className="text-2xl font-bold mb-2">Analyzing {audit.businessName}...</h2>
+          <p className="text-gray-600 mb-4">
+            We're running a comprehensive audit across SEO, AEO, competitive visibility, lead capture, and more.
+          </p>
+          <p className="text-sm text-gray-500">This page will automatically update when complete.</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (audit.status === "failed") {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-teal-50 flex items-center justify-center">
+        <div className="text-center">
+          <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
+          <h2 className="text-2xl font-bold mb-2">Audit Failed</h2>
+          <p className="text-gray-600 mb-4">Something went wrong while generating your audit.</p>
+          <Button onClick={() => setLocation("/audit")}>Try Again</Button>
+        </div>
+      </div>
+    );
+  }
+
+  // Parse JSON fields
+  const gbp = audit.gbpAuditResults ? JSON.parse(audit.gbpAuditResults) : null;
+  const seo = audit.seoAuditResults ? JSON.parse(audit.seoAuditResults) : null;
+  const competitive = audit.competitiveResults ? JSON.parse(audit.competitiveResults) : null;
+  const aeo = audit.aeoResults ? JSON.parse(audit.aeoResults) : null;
+  const leadCapture = audit.leadCaptureResults ? JSON.parse(audit.leadCaptureResults) : null;
+  const followUp = audit.followUpResults ? JSON.parse(audit.followUpResults) : null;
+  const keyFindings = audit.keyFindings ? JSON.parse(audit.keyFindings) : [];
+  const recommendations = audit.recommendations ? JSON.parse(audit.recommendations) : null;
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-teal-50">
+      {/* Header */}
+      <header className="bg-white border-b sticky top-0 z-50">
+        <div className="container py-4">
+          <div className="flex justify-between items-center">
+            <div className="flex items-center gap-4">
+              <Button variant="ghost" onClick={() => setLocation("/")}>
+                <ArrowLeft className="w-4 h-4 mr-2" /> Back
+              </Button>
+              <div>
+                <h1 className="text-xl font-bold">Local Authority Snapshot</h1>
+                <p className="text-sm text-gray-600">{audit.businessName}</p>
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={() => toast.info("Email feature coming soon")}>
+                <Mail className="w-4 h-4 mr-2" /> Email Report
+              </Button>
+              <Button className="bg-orange-500 hover:bg-orange-600" onClick={() => toast.info("PDF export coming soon")}>
+                <Download className="w-4 h-4 mr-2" /> Download PDF
+              </Button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <div className="container py-12 max-w-6xl">
+        {/* Title & Executive Summary */}
+        <div className="mb-12">
+          <h1 className="text-4xl md:text-5xl font-bold mb-4">
+            Local Authority Snapshot: SEO + AEO Revenue Recapture Audit
+          </h1>
+          <div className="flex items-center gap-4 mb-6">
+            <Badge variant="outline" className="text-base py-1 px-3">
+              {audit.primaryNiche}
+            </Badge>
+            <Badge variant="outline" className="text-base py-1 px-3">
+              {audit.primaryLocation}
+            </Badge>
+            <Badge className="bg-teal-500 text-white text-base py-1 px-3">
+              <CheckCircle2 className="w-4 h-4 mr-1" /> Completed
+            </Badge>
+          </div>
+
+          {audit.executiveSummary && (
+            <Card className="bg-white/90 backdrop-blur border-0 shadow-lg">
+              <CardHeader>
+                <CardTitle>Executive Summary</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-lg leading-relaxed text-gray-700">{audit.executiveSummary}</p>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+
+        {/* Key Findings */}
+        {keyFindings.length > 0 && (
+          <Card className="mb-12 border-0 shadow-lg">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Target className="w-6 h-6 text-orange-500" />
+                Key Findings at a Glance
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ul className="space-y-3">
+                {keyFindings.map((finding: string, i: number) => (
+                  <li key={i} className="flex items-start gap-3">
+                    <CheckCircle2 className="w-5 h-5 text-teal-500 flex-shrink-0 mt-0.5" />
+                    <span className="text-gray-700">{finding}</span>
+                  </li>
+                ))}
+              </ul>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Audit Scores Section */}
+        <div className="mb-12">
+          <h2 className="text-3xl font-bold mb-6">Visibility: SEO + AEO</h2>
+          <div className="grid md:grid-cols-3 gap-6 mb-8">
+            {gbp && (
+              <ScoreCard
+                title="GBP Optimization"
+                score={gbp.score}
+                description="Google Business Profile"
+              />
+            )}
+            {seo && (
+              <ScoreCard
+                title="Website Local SEO"
+                score={seo.score}
+                description="On-page optimization"
+              />
+            )}
+            {aeo && (
+              <ScoreCard
+                title="AI Discoverability"
+                score={aeo.score}
+                description="ChatGPT, Gemini, Perplexity"
+              />
+            )}
+          </div>
+
+          {/* GBP Details */}
+          {gbp && (
+            <Card className="mb-6 border-0 shadow-lg">
+              <CardHeader>
+                <CardTitle>Google Business Profile Audit</CardTitle>
+                <CardDescription>Optimization opportunities for Maps ranking</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {gbp.issues && gbp.issues.length > 0 && (
+                  <div>
+                    <h4 className="font-semibold mb-3 text-red-600">Top Issues Hurting Ranking</h4>
+                    <ul className="space-y-2">
+                      {gbp.issues.slice(0, 10).map((issue: string, i: number) => (
+                        <li key={i} className="flex items-start gap-2">
+                          <AlertCircle className="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5" />
+                          <span className="text-sm">{issue}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {gbp.improvements && gbp.improvements.length > 0 && (
+                  <div>
+                    <h4 className="font-semibold mb-3 text-teal-600">Top Improvements</h4>
+                    <ul className="space-y-2">
+                      {gbp.improvements.slice(0, 10).map((improvement: string, i: number) => (
+                        <li key={i} className="flex items-start gap-2">
+                          <TrendingUp className="w-4 h-4 text-teal-500 flex-shrink-0 mt-0.5" />
+                          <span className="text-sm">{improvement}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {gbp.optimizedDescription && (
+                  <div>
+                    <h4 className="font-semibold mb-3">Example Optimized Business Description</h4>
+                    <p className="text-sm bg-gray-50 p-4 rounded-lg">{gbp.optimizedDescription}</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
+          {/* SEO Details */}
+          {seo && (
+            <Card className="mb-6 border-0 shadow-lg">
+              <CardHeader>
+                <CardTitle>Website Local SEO Audit</CardTitle>
+                <CardDescription>On-page optimization and search visibility</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {seo.queries && seo.queries.length > 0 && (
+                  <div>
+                    <h4 className="font-semibold mb-3">Search Visibility Analysis</h4>
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-sm">
+                        <thead>
+                          <tr className="border-b">
+                            <th className="text-left py-2">Query</th>
+                            <th className="text-left py-2">Organic</th>
+                            <th className="text-left py-2">Map Pack</th>
+                            <th className="text-left py-2">Competitors Above</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {seo.queries.map((q: any, i: number) => (
+                            <tr key={i} className="border-b">
+                              <td className="py-2">{q.query}</td>
+                              <td className="py-2">{q.organicPresence}</td>
+                              <td className="py-2">{q.mapPackPresence}</td>
+                              <td className="py-2">{q.competitorsAbove}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
+
+                {seo.weaknesses && seo.weaknesses.length > 0 && (
+                  <div>
+                    <h4 className="font-semibold mb-3 text-red-600">SEO Weaknesses</h4>
+                    <ul className="grid md:grid-cols-2 gap-2">
+                      {seo.weaknesses.slice(0, 10).map((weakness: string, i: number) => (
+                        <li key={i} className="flex items-start gap-2">
+                          <span className="text-red-500">•</span>
+                          <span className="text-sm">{weakness}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {seo.improvements && seo.improvements.length > 0 && (
+                  <div>
+                    <h4 className="font-semibold mb-3 text-teal-600">SEO Improvements</h4>
+                    <ul className="grid md:grid-cols-2 gap-2">
+                      {seo.improvements.slice(0, 10).map((improvement: string, i: number) => (
+                        <li key={i} className="flex items-start gap-2">
+                          <span className="text-teal-500">•</span>
+                          <span className="text-sm">{improvement}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
+          {/* AEO Details */}
+          {aeo && (
+            <Card className="mb-6 border-0 shadow-lg">
+              <CardHeader>
+                <CardTitle>Answer Engine Optimization (AEO)</CardTitle>
+                <CardDescription>Visibility in AI tools like ChatGPT, Gemini, and Perplexity</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="grid md:grid-cols-2 gap-6">
+                  {aeo.whyAIWouldRecommend && (
+                    <div>
+                      <h4 className="font-semibold mb-2 text-teal-600">Why AI Would Recommend You</h4>
+                      <p className="text-sm text-gray-700">{aeo.whyAIWouldRecommend}</p>
+                    </div>
+                  )}
+                  {aeo.whyAIWouldNot && (
+                    <div>
+                      <h4 className="font-semibold mb-2 text-red-600">Why AI Would NOT Recommend You</h4>
+                      <p className="text-sm text-gray-700">{aeo.whyAIWouldNot}</p>
+                    </div>
+                  )}
+                </div>
+
+                {aeo.fixes && aeo.fixes.length > 0 && (
+                  <div>
+                    <h4 className="font-semibold mb-3">10 Fixes to Improve AI Visibility</h4>
+                    <ul className="grid md:grid-cols-2 gap-2">
+                      {aeo.fixes.map((fix: string, i: number) => (
+                        <li key={i} className="flex items-start gap-2">
+                          <Zap className="w-4 h-4 text-orange-500 flex-shrink-0 mt-0.5" />
+                          <span className="text-sm">{fix}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {aeo.exampleFAQ && (
+                  <div>
+                    <h4 className="font-semibold mb-3">Example FAQ Content AI Could Quote</h4>
+                    <pre className="text-sm bg-gray-50 p-4 rounded-lg whitespace-pre-wrap">{aeo.exampleFAQ}</pre>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
+        </div>
+
+        {/* Competitive Analysis */}
+        {competitive && (
+          <Card className="mb-12 border-0 shadow-lg">
+            <CardHeader>
+              <CardTitle>Competitive Visibility Analysis</CardTitle>
+              <CardDescription>Why competitors outrank you and how to close the gap</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {competitive.reasonsCompetitorsRank && competitive.reasonsCompetitorsRank.length > 0 && (
+                <div>
+                  <h4 className="font-semibold mb-3">5 Reasons Competitors Rank Higher</h4>
+                  <ul className="space-y-2">
+                    {competitive.reasonsCompetitorsRank.map((reason: string, i: number) => (
+                      <li key={i} className="flex items-start gap-2">
+                        <span className="text-orange-500 font-bold">{i + 1}.</span>
+                        <span className="text-sm">{reason}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {competitive.trustGaps && competitive.trustGaps.length > 0 && (
+                <div>
+                  <h4 className="font-semibold mb-3">Trust Signal Gaps</h4>
+                  <ul className="space-y-2">
+                    {competitive.trustGaps.map((gap: string, i: number) => (
+                      <li key={i} className="flex items-start gap-2">
+                        <AlertCircle className="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5" />
+                        <span className="text-sm">{gap}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Lead Capture & AI Voice */}
+        {leadCapture && (
+          <Card className="mb-12 border-0 shadow-lg">
+            <CardHeader>
+              <CardTitle>Lead Capture & AI Voice Opportunities</CardTitle>
+              <CardDescription>How to capture every lead with AI-powered systems</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {leadCapture.channels && leadCapture.channels.length > 0 && (
+                <div>
+                  <h4 className="font-semibold mb-3">Current Lead Capture Channels</h4>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="border-b">
+                          <th className="text-left py-2">Channel</th>
+                          <th className="text-left py-2">Visibility</th>
+                          <th className="text-left py-2">After Hours</th>
+                          <th className="text-left py-2">Risk Level</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {leadCapture.channels.map((ch: any, i: number) => (
+                          <tr key={i} className="border-b">
+                            <td className="py-2">{ch.channel}</td>
+                            <td className="py-2">{ch.visibility}</td>
+                            <td className="py-2">{ch.afterHoursCoverage}</td>
+                            <td className="py-2">
+                              <Badge
+                                variant={ch.riskLevel === "High" ? "destructive" : "outline"}
+                                className={ch.riskLevel === "Medium" ? "bg-orange-100 text-orange-800" : ""}
+                              >
+                                {ch.riskLevel}
+                              </Badge>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+
+              {leadCapture.aiVoiceOpportunities && leadCapture.aiVoiceOpportunities.length > 0 && (
+                <div>
+                  <h4 className="font-semibold mb-3 text-teal-600">AI Voice Agent Opportunities</h4>
+                  <ul className="space-y-2">
+                    {leadCapture.aiVoiceOpportunities.map((opp: string, i: number) => (
+                      <li key={i} className="flex items-start gap-2">
+                        <CheckCircle2 className="w-4 h-4 text-teal-500 flex-shrink-0 mt-0.5" />
+                        <span className="text-sm">{opp}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {leadCapture.conversationAIOpportunities && leadCapture.conversationAIOpportunities.length > 0 && (
+                <div>
+                  <h4 className="font-semibold mb-3 text-orange-600">Conversation AI Widget Opportunities</h4>
+                  <ul className="space-y-2">
+                    {leadCapture.conversationAIOpportunities.map((opp: string, i: number) => (
+                      <li key={i} className="flex items-start gap-2">
+                        <CheckCircle2 className="w-4 h-4 text-orange-500 flex-shrink-0 mt-0.5" />
+                        <span className="text-sm">{opp}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Revenue Recapture Summary */}
+        {recommendations?.revenueRecapture && (
+          <Card className="mb-12 border-0 shadow-lg bg-gradient-to-br from-orange-50 to-teal-50">
+            <CardHeader>
+              <CardTitle className="text-2xl">Revenue Recapture Summary</CardTitle>
+              <CardDescription>Key opportunities to capture more revenue</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {recommendations.revenueRecapture.estimatedMonthlyRecovery && (
+                <div className="bg-white rounded-lg p-6 mb-6 text-center">
+                  <p className="text-sm text-gray-600 mb-2">Estimated Monthly Revenue Recovery</p>
+                  <p className="text-5xl font-bold text-orange-500">
+                    ${recommendations.revenueRecapture.estimatedMonthlyRecovery.toLocaleString()}
+                  </p>
+                  <p className="text-xs text-gray-500 mt-2">Based on current lead volume and conversion gaps</p>
+                </div>
+              )}
+
+              {recommendations.revenueRecapture.opportunities && (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm bg-white rounded-lg">
+                    <thead>
+                      <tr className="border-b">
+                        <th className="text-left py-3 px-4">Area</th>
+                        <th className="text-left py-3 px-4">Key Issue</th>
+                        <th className="text-left py-3 px-4">Impact</th>
+                        <th className="text-left py-3 px-4">Revenue Upside</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {recommendations.revenueRecapture.opportunities.map((opp: any, i: number) => (
+                        <tr key={i} className="border-b last:border-0">
+                          <td className="py-3 px-4 font-medium">{opp.area}</td>
+                          <td className="py-3 px-4">{opp.keyIssue}</td>
+                          <td className="py-3 px-4">
+                            <Badge
+                              variant={opp.impactLevel === "High" ? "destructive" : "outline"}
+                              className={opp.impactLevel === "Medium" ? "bg-orange-100 text-orange-800" : ""}
+                            >
+                              {opp.impactLevel}
+                            </Badge>
+                          </td>
+                          <td className="py-3 px-4">{opp.revenueUpside}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Recommended Plan */}
+        {recommendations?.recommendedPlan && (
+          <div className="mb-12">
+            <h2 className="text-3xl font-bold mb-6">{recommendations.recommendedPlan.planName}</h2>
+
+            {/* Pillars */}
+            {recommendations.recommendedPlan.pillars && recommendations.recommendedPlan.pillars.length > 0 && (
+              <div className="grid md:grid-cols-2 gap-6 mb-8">
+                {recommendations.recommendedPlan.pillars.map((pillar: any, i: number) => (
+                  <Card key={i} className="border-0 shadow-lg">
+                    <CardHeader>
+                      <CardTitle className="text-lg">{pillar.title}</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-sm text-gray-700 mb-4">{pillar.description}</p>
+                      <ul className="space-y-1">
+                        {pillar.outcomes.map((outcome: string, j: number) => (
+                          <li key={j} className="flex items-start gap-2 text-sm">
+                            <CheckCircle2 className="w-4 h-4 text-teal-500 flex-shrink-0 mt-0.5" />
+                            <span>{outcome}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+
+            {/* Roadmap */}
+            {recommendations.recommendedPlan.roadmap && (
+              <Card className="mb-8 border-0 shadow-lg">
+                <CardHeader>
+                  <CardTitle>Implementation Roadmap</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  {Object.entries(recommendations.recommendedPlan.roadmap).map(([key, phase]: [string, any]) => (
+                    <div key={key}>
+                      <h4 className="font-semibold text-lg mb-2">{phase.title}</h4>
+                      <p className="text-sm text-gray-600 mb-3">{phase.description}</p>
+                      <ul className="space-y-1">
+                        {phase.items.map((item: string, i: number) => (
+                          <li key={i} className="flex items-start gap-2 text-sm">
+                            <span className="text-orange-500">•</span>
+                            <span>{item}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Pricing Packages */}
+            {recommendations.recommendedPlan.pricingPackages && (
+              <div>
+                <h3 className="text-2xl font-bold mb-6">Investment Options</h3>
+                <div className="grid md:grid-cols-3 gap-6">
+                  {recommendations.recommendedPlan.pricingPackages.map((pkg: any, i: number) => (
+                    <Card key={i} className="border-2 border-gray-200 hover:border-orange-500 transition-colors">
+                      <CardHeader>
+                        <CardTitle className="text-xl">{pkg.name}</CardTitle>
+                        <CardDescription>{pkg.focus}</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="mb-4">
+                          <p className="text-2xl font-bold text-orange-500">{pkg.investmentRange}</p>
+                        </div>
+                        <ul className="space-y-2 mb-4">
+                          {pkg.includes.map((item: string, j: number) => (
+                            <li key={j} className="flex items-start gap-2 text-sm">
+                              <CheckCircle2 className="w-4 h-4 text-teal-500 flex-shrink-0 mt-0.5" />
+                              <span>{item}</span>
+                            </li>
+                          ))}
+                        </ul>
+                        <p className="text-xs text-gray-600 italic">Ideal for: {pkg.idealFor}</p>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* CTA */}
+        <Card className="border-0 shadow-lg bg-gradient-to-br from-teal-500 to-teal-600 text-white">
+          <CardContent className="py-12 text-center">
+            <h3 className="text-3xl font-bold mb-4">Ready to Recapture Your Revenue?</h3>
+            <p className="text-xl mb-8 text-teal-50">
+              Let's turn these insights into results. Schedule a strategy call with eighty5labs.
+            </p>
+            <Button size="lg" className="bg-white text-teal-600 hover:bg-gray-100 text-lg px-8 py-6">
+              Schedule Strategy Call
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Footer */}
+      <footer className="border-t bg-white py-8 mt-12">
+        <div className="container text-center text-gray-600">
+          <p className="mb-2">
+            <strong className="text-black">eighty5labs</strong> — Agentic Marketing Infrastructure
+          </p>
+          <p className="text-sm">Your marketing runs itself. Your revenue doesn't sleep.</p>
+        </div>
+      </footer>
+    </div>
+  );
+}
+
+function ScoreCard({ title, score, description }: { title: string; score: number; description: string }) {
+  const getColor = (score: number) => {
+    if (score >= 70) return "text-teal-600";
+    if (score >= 40) return "text-orange-500";
+    return "text-red-500";
+  };
+
+  return (
+    <Card className="border-0 shadow-lg text-center">
+      <CardContent className="pt-6">
+        <h3 className="text-lg font-semibold mb-2">{title}</h3>
+        <div className={`text-6xl font-bold mb-2 ${getColor(score)}`}>{score}</div>
+        <p className="text-sm text-gray-500">/100</p>
+        <p className="text-xs text-gray-500 mt-2">{description}</p>
+      </CardContent>
+    </Card>
+  );
+}
