@@ -1,0 +1,8 @@
+{
+  "query": "DELETE FROM audit_visuals WHERE auditId = 30006; DELETE FROM audits WHERE id = 30006;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user gvHM7L26eFEKLxd.root --database hmgSMMSSNJCN2iZZwVjazU --execute DELETE FROM audit_visuals WHERE auditId = 30006; DELETE FROM audits WHERE id = 30006;",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1146 (42S02) at line 1: Table 'hmgsmmssnjcn2izzwvjazu.audit_visuals' doesn't exist"
+  ]
+}

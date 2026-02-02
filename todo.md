@@ -233,7 +233,7 @@
 ## 🔴 HIGHEST PRIORITY (User Feedback - Must Fix Now)
 
 ### PRIORITY #1: REAL DATA COLLECTION (CRITICAL - MOST IMPORTANT)
-- [ ] Fix audit engine JSON storage - ensure LLM responses are valid JSON before saving
+- [ ] Rebuild audit engine with strict JSON validation before saving
 - [ ] Test website crawler with eighty5labs.com - verify real title/meta/headings extracted
 - [ ] Test GBP scraper with real URL - verify actual ratings/reviews pulled
 - [ ] Fix ranking tracker to show real positions (not all "Not ranking")
