@@ -33,6 +33,7 @@ export const audits = mysqlTable("audits", {
   // Business basics
   businessName: varchar("businessName", { length: 255 }).notNull(),
   websiteUrl: varchar("websiteUrl", { length: 512 }).notNull(),
+  gbpUrl: varchar("gbpUrl", { length: 512 }),
   primaryLocation: varchar("primaryLocation", { length: 255 }).notNull(),
   primaryNiche: varchar("primaryNiche", { length: 100 }).notNull(),
   nicheDescription: text("nicheDescription"),

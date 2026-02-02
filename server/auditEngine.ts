@@ -1,11 +1,13 @@
 import { invokeLLM } from "./_core/llm";
 import { searchGBP, analyzeGBPData } from "./gbpScraper";
+import { fetchGBPFromUrl, analyzeGBPFromUrl } from "./gbpUrlParser";
 import { crawlWebsite, analyzeWebsiteData } from "./websiteCrawler";
 import { searchCompetitors, analyzeCompetitiveData, generateCompetitiveRecommendations } from "./competitiveAnalysis";
 
 export interface AuditInput {
   businessName: string;
   websiteUrl: string;
+  gbpUrl?: string;
   primaryLocation: string;
   primaryNiche: string;
   nicheDescription?: string;
@@ -124,14 +126,39 @@ export interface RecommendedPlan {
  * Analyze Google Business Profile with REAL scraped data
  */
 export async function analyzeGBP(input: AuditInput): Promise<GBPAuditResult> {
-  // Step 1: Scrape real GBP data
-  const gbpData = await searchGBP(input.businessName, input.primaryLocation);
-  const gbpAnalysis = analyzeGBPData(gbpData, input.businessName);
+  // Step 1: Get real GBP data (from URL if provided, otherwise search)
+  let gbpAnalysis: any;
+  let dataContext: string;
 
-  // Step 2: Use LLM to generate optimized content based on real data
-  const dataContext = gbpData.error
-    ? `⚠️ REAL DATA: Google Business Profile not found or inaccessible. This business may not have claimed their GBP.`
-    : `✅ REAL DATA FOUND:
+  if (input.gbpUrl) {
+    // Use provided GBP URL
+    const gbpUrlData = await fetchGBPFromUrl(input.gbpUrl);
+    gbpAnalysis = analyzeGBPFromUrl(gbpUrlData);
+    
+    dataContext = gbpUrlData.error
+      ? `⚠️ REAL DATA: Unable to fetch from provided GBP URL. Error: ${gbpUrlData.error}`
+      : `✅ REAL DATA FROM YOUR GBP URL:
+- Business Name: ${gbpUrlData.businessName || "Not found"}
+- Rating: ${gbpUrlData.rating !== null ? `${gbpUrlData.rating} stars` : "No rating"}
+- Review Count: ${gbpUrlData.reviewCount !== null ? `${gbpUrlData.reviewCount} reviews` : "No reviews"}
+- Address: ${gbpUrlData.address || "Not found"}
+- Phone: ${gbpUrlData.phone || "Not found"}
+- Website: ${gbpUrlData.website || "Not found"}
+- Categories: ${gbpUrlData.categories.length > 0 ? gbpUrlData.categories.join(", ") : "None"}
+- Photos: ${gbpUrlData.photoCount !== null ? `${gbpUrlData.photoCount} photos` : "Not found"}
+
+ANALYSIS BASED ON REAL DATA:
+- Score: ${gbpAnalysis.score}/100
+- Issues: ${gbpAnalysis.issues.join(", ")}
+- Strengths: ${gbpAnalysis.strengths.join(", ")}`;
+  } else {
+    // Fall back to search
+    const gbpData = await searchGBP(input.businessName, input.primaryLocation);
+    gbpAnalysis = analyzeGBPData(gbpData, input.businessName);
+    
+    dataContext = gbpData.error
+      ? `⚠️ REAL DATA: Google Business Profile not found or inaccessible. This business may not have claimed their GBP.`
+      : `✅ REAL DATA FOUND:
 - Business Name: ${gbpData.businessName || "Not found"}
 - Rating: ${gbpData.rating !== null ? `${gbpData.rating} stars` : "No rating"}
 - Review Count: ${gbpData.reviewCount !== null ? `${gbpData.reviewCount} reviews` : "No reviews"}
@@ -143,7 +170,9 @@ ANALYSIS BASED ON REAL DATA:
 - Score: ${gbpAnalysis.score}/100
 - Issues: ${gbpAnalysis.issues.join(", ")}
 - Strengths: ${gbpAnalysis.strengths.join(", ")}`;
+  }
 
+  // Step 2: Use LLM to generate optimized content based on real data
   const prompt = `You are a local SEO expert. You have REAL scraped data from Google for ${input.businessName}, a ${input.primaryNiche} business in ${input.primaryLocation}.
 
 ${dataContext}

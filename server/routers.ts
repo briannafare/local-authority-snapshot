@@ -75,6 +75,7 @@ export const appRouter = router({
         z.object({
           businessName: z.string(),
           websiteUrl: z.string(),
+          gbpUrl: z.string().optional(),
           primaryLocation: z.string(),
           primaryNiche: z.string(),
           nicheDescription: z.string().optional(),

@@ -118,3 +118,30 @@
 - [x] Add download button to report page
 - [x] Test PDF generation with sample reports (all tests passing)
 - [x] Ensure PDF is print-friendly and professional
+
+
+## CRITICAL FIXES (User Reported Issues)
+
+### Data Accuracy Issues
+- [x] Fix GBP scraping - added GBP URL field to extract real data
+- [x] Fix website crawler - enhanced chat widget detection with 10+ platforms and script checking
+- [ ] Add real search ranking data - show actual positions for key queries
+- [ ] Remove "unknown" and "unclear" placeholders - only show real data or clearly marked industry benchmarks
+- [x] Add debugging/logging to see why scraping is failing
+
+### PDF Generation
+- [x] Fix PDF download error - manus-md-to-pdf utility working
+- [ ] Test PDF generation end-to-end with real audit data
+
+### Visual Enhancements
+- [x] Install matplotlib and fix chart generation
+- [ ] Add heat maps showing local ranking by geographic area
+- [ ] Add ranking comparison charts (your position vs competitors)
+- [x] Add score visualization gauges for each audit section (implemented in generateVisuals.py)
+- [ ] Add competitive landscape visual (who ranks where for key terms)
+- [ ] Add funnel visualization showing lead capture drop-off points
+
+### Testing
+- [ ] Test with eighty5labs.com actual data
+- [ ] Verify all scraped data matches reality
+- [ ] Ensure no generic/placeholder content in final reports

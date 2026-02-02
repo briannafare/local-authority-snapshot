@@ -18,6 +18,7 @@ import { ArrowLeft, ArrowRight, CheckCircle2, Loader2 } from "lucide-react";
 const step1Schema = z.object({
   businessName: z.string().min(2, "Business name is required"),
   websiteUrl: z.string().url("Please enter a valid website URL"),
+  gbpUrl: z.string().url("Please enter a valid URL").optional().or(z.literal("")),
   primaryLocation: z.string().min(2, "Location is required"),
   primaryNiche: z.string().min(1, "Please select a niche"),
   nicheDescription: z.string().optional(),
@@ -225,6 +226,19 @@ function Step1Form({ onNext, defaultValues }: { onNext: (data: Step1Data) => voi
         <Label htmlFor="websiteUrl">Website URL *</Label>
         <Input id="websiteUrl" {...register("websiteUrl")} placeholder="https://example.com" />
         {errors.websiteUrl && <p className="text-sm text-red-500 mt-1">{errors.websiteUrl.message}</p>}
+      </div>
+
+      <div>
+        <Label htmlFor="gbpUrl">Google Business Profile URL (Optional)</Label>
+        <Input
+          id="gbpUrl"
+          {...register("gbpUrl")}
+          placeholder="https://maps.google.com/?cid=... or https://g.page/..."
+        />
+        <p className="text-xs text-gray-500 mt-1">
+          Paste your Google Business Profile link for accurate GBP data
+        </p>
+        {errors.gbpUrl && <p className="text-sm text-red-500 mt-1">{errors.gbpUrl.message}</p>}
       </div>
 
       <div>

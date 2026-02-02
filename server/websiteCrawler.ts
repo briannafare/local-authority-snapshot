@@ -186,17 +186,47 @@ export async function crawlWebsite(url: string): Promise<WebsiteData> {
     // Count images
     result.images = $("img").length;
 
-    // Check for chat widgets
+    // Check for chat widgets (enhanced detection)
     const chatSelectors = [
-      "#tawk-bubble",
-      ".intercom-launcher",
-      "#drift-widget",
-      ".crisp-client",
-      "#hubspot-messages-iframe-container",
-      "[id*='chat']",
-      "[class*='chat']",
+      // Popular chat platforms
+      "#tawk-bubble", ".tawk-button", "[id*='tawk']",
+      ".intercom-launcher", "#intercom-container", "[id*='intercom']",
+      "#drift-widget", ".drift-controller", "[id*='drift']",
+      ".crisp-client", "#crisp-chatbox", "[id*='crisp']",
+      "#hubspot-messages-iframe-container", "[id*='hubspot']",
+      "#tidio-chat", "[id*='tidio']",
+      ".zendesk-chat", "[id*='zendesk']",
+      "#livechat-widget", "[id*='livechat']",
+      "#olark-box", "[id*='olark']",
+      ".freshchat-widget", "[id*='freshchat']",
+      // Generic patterns
+      "[id*='chat']", "[class*='chat']",
+      "[id*='messenger']", "[class*='messenger']",
+      "[id*='support']", "[class*='live-support']",
+      "iframe[src*='chat']", "iframe[src*='messenger']",
     ];
-    result.hasChat = chatSelectors.some((selector) => $(selector).length > 0);
+    
+    // Check DOM elements
+    const hasChatElement = chatSelectors.some((selector) => $(selector).length > 0);
+    
+    // Check for chat scripts in HTML
+    const scriptTags = $("script").map((_, el) => $(el).html() || $(el).attr("src") || "").get().join(" ");
+    const chatScriptPatterns = [
+      /tawk\.to/i,
+      /intercom/i,
+      /drift/i,
+      /crisp\.chat/i,
+      /hubspot.*chat/i,
+      /tidio/i,
+      /zendesk.*chat/i,
+      /livechat/i,
+      /olark/i,
+      /freshchat/i,
+      /messenger.*widget/i,
+    ];
+    const hasChatScript = chatScriptPatterns.some((pattern) => pattern.test(scriptTags));
+    
+    result.hasChat = hasChatElement || hasChatScript;
 
     // Check for mobile viewport
     const viewport = $('meta[name="viewport"]').attr("content");
