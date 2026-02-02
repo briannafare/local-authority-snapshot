@@ -4,6 +4,9 @@ Generate branded visualizations for Local Authority Snapshot audits.
 Uses eighty5labs brand colors: Orange (#FF6B35) and Teal (#2DD4BF)
 """
 
+import sys
+print(f'Python executable: {sys.executable}', file=sys.stderr)
+print(f'Python path: {sys.path}', file=sys.stderr)
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 from matplotlib.patches import FancyBboxPatch, Wedge

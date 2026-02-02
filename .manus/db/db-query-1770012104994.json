@@ -1,0 +1,30 @@
+{
+  "query": "SELECT visualType, description FROM auditVisuals WHERE auditId = 60009",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user gvHM7L26eFEKLxd.root --database hmgSMMSSNJCN2iZZwVjazU --execute SELECT visualType, description FROM auditVisuals WHERE auditId = 60009",
+  "rows": [
+    {
+      "visualType": "gbp_score_gauge",
+      "description": "Google Business Profile optimization score gauge"
+    },
+    {
+      "visualType": "seo_score_gauge",
+      "description": "Website local SEO score gauge"
+    },
+    {
+      "visualType": "aeo_score_gauge",
+      "description": "AI/AEO discoverability score gauge"
+    },
+    {
+      "visualType": "ranking_comparison",
+      "description": "Search ranking comparison vs top competitor"
+    },
+    {
+      "visualType": "conversion_funnel",
+      "description": "Revenue recapture conversion funnel"
+    }
+  ],
+  "messages": [],
+  "stdout": "visualType\tdescription\ngbp_score_gauge\tGoogle Business Profile optimization score gauge\nseo_score_gauge\tWebsite local SEO score gauge\naeo_score_gauge\tAI/AEO discoverability score gauge\nranking_comparison\tSearch ranking comparison vs top competitor\nconversion_funnel\tRevenue recapture conversion funnel\n",
+  "stderr": "",
+  "execution_time_ms": 62
+}

@@ -395,24 +395,73 @@ export default function Report() {
 
                 {/* Visual Charts */}
                 {audit.visuals && audit.visuals.length > 0 && (
-                  <div className="space-y-4">
-                    <h4 className="font-semibold mb-3">Visual Analytics</h4>
-                    <div className="grid md:grid-cols-2 gap-4">
+                  <div className="space-y-6">
+                    <h3 className="text-xl font-bold text-gray-900">Visual Analytics</h3>
+                    
+                    {/* Score Gauges */}
+                    <div className="grid md:grid-cols-3 gap-6">
+                      {audit.visuals
+                        .filter((v: any) => v.visualType && v.visualType.includes('_score_gauge'))
+                        .map((visual: any) => (
+                          <div key={visual.id} className="border rounded-lg overflow-hidden bg-white shadow-sm">
+                            <img 
+                              src={visual.imageUrl} 
+                              alt={visual.description || visual.visualType} 
+                              className="w-full h-auto"
+                            />
+                          </div>
+                        ))
+                      }
+                    </div>
+                    
+                    {/* Comparison Charts */}
+                    <div className="grid md:grid-cols-2 gap-6">
                       {audit.visuals
                         .filter((v: any) => 
-                          v.visualType === 'ranking_comparison' || 
-                          v.visualType === 'ranking_heat_map'
+                          v.visualType && (
+                            v.visualType === 'scores_comparison' || 
+                            v.visualType === 'ranking_comparison' || 
+                            v.visualType === 'ranking_heat_map'
+                          )
                         )
                         .map((visual: any) => (
                           <div key={visual.id} className="border rounded-lg overflow-hidden bg-white shadow-sm">
                             <img 
-                              src={visual.url} 
-                              alt={visual.description} 
+                              src={visual.imageUrl} 
+                              alt={visual.description || visual.visualType} 
                               className="w-full h-auto"
                             />
-                            <div className="p-3 bg-gray-50 text-xs text-gray-600">
-                              {visual.description}
-                            </div>
+                            {visual.description && (
+                              <div className="p-3 bg-gray-50 text-sm text-gray-600">
+                                {visual.description}
+                              </div>
+                            )}
+                          </div>
+                        ))
+                      }
+                    </div>
+                    
+                    {/* Revenue & Funnel Charts */}
+                    <div className="grid md:grid-cols-2 gap-6">
+                      {audit.visuals
+                        .filter((v: any) => 
+                          v.visualType && (
+                            v.visualType === 'revenue_opportunity' || 
+                            v.visualType === 'conversion_funnel'
+                          )
+                        )
+                        .map((visual: any) => (
+                          <div key={visual.id} className="border rounded-lg overflow-hidden bg-white shadow-sm">
+                            <img 
+                              src={visual.imageUrl} 
+                              alt={visual.description || visual.visualType} 
+                              className="w-full h-auto"
+                            />
+                            {visual.description && (
+                              <div className="p-3 bg-gray-50 text-sm text-gray-600">
+                                {visual.description}
+                              </div>
+                            )}
                           </div>
                         ))
                       }

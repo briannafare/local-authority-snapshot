@@ -516,7 +516,26 @@ Return ONLY valid JSON in this exact format:
   const content = typeof response.choices[0]?.message?.content === 'string' 
     ? response.choices[0].message.content 
     : "{}";
-  return JSON.parse(content);
+  
+  try {
+    return JSON.parse(content);
+  } catch (error) {
+    console.error('[JSON Parse Error] Failed to parse LLM response:', error);
+    console.error('[JSON Parse Error] Content:', content);
+    
+    // Try to extract JSON from markdown code blocks
+    const jsonMatch = content.match(/```(?:json)?\s*([\s\S]*?)```/);
+    if (jsonMatch) {
+      try {
+        return JSON.parse(jsonMatch[1].trim());
+      } catch (e) {
+        console.error('[JSON Parse Error] Failed to parse extracted JSON:', e);
+      }
+    }
+    
+    // Return empty object as fallback
+    return { score: 0, whyAIWouldRecommend: '', whyAIWouldNot: '', fixes: [], exampleFAQ: '', optimizedAboutUs: '', prompts: [] };
+  }
 }
 
 /**
@@ -570,7 +589,26 @@ Return ONLY valid JSON in this exact format:
   const content = typeof response.choices[0]?.message?.content === 'string' 
     ? response.choices[0].message.content 
     : "{}";
-  return JSON.parse(content);
+  
+  try {
+    return JSON.parse(content);
+  } catch (error) {
+    console.error('[JSON Parse Error] Failed to parse LLM response:', error);
+    console.error('[JSON Parse Error] Content:', content);
+    
+    // Try to extract JSON from markdown code blocks
+    const jsonMatch = content.match(/```(?:json)?\s*([\s\S]*?)```/);
+    if (jsonMatch) {
+      try {
+        return JSON.parse(jsonMatch[1].trim());
+      } catch (e) {
+        console.error('[JSON Parse Error] Failed to parse extracted JSON:', e);
+      }
+    }
+    
+    // Return empty object as fallback
+    return { channels: [], aiVoiceOpportunities: [], conversationAIOpportunities: [] };
+  }
 }
 
 /**
@@ -610,7 +648,26 @@ Return ONLY valid JSON in this exact format:
   const content = typeof response.choices[0]?.message?.content === 'string' 
     ? response.choices[0].message.content 
     : "{}";
-  return JSON.parse(content);
+  
+  try {
+    return JSON.parse(content);
+  } catch (error) {
+    console.error('[JSON Parse Error] Failed to parse LLM response:', error);
+    console.error('[JSON Parse Error] Content:', content);
+    
+    // Try to extract JSON from markdown code blocks
+    const jsonMatch = content.match(/```(?:json)?\s*([\s\S]*?)```/);
+    if (jsonMatch) {
+      try {
+        return JSON.parse(jsonMatch[1].trim());
+      } catch (e) {
+        console.error('[JSON Parse Error] Failed to parse extracted JSON:', e);
+      }
+    }
+    
+    // Return empty object as fallback
+    return { currentState: '', opportunityState: '', automationOpportunities: [], reactivationPotential: '' };
+  }
 }
 
 /**
@@ -767,7 +824,26 @@ Return ONLY valid JSON in this exact format:
   const content = typeof response.choices[0]?.message?.content === 'string' 
     ? response.choices[0].message.content 
     : "{}";
-  return JSON.parse(content);
+  
+  try {
+    return JSON.parse(content);
+  } catch (error) {
+    console.error('[JSON Parse Error] Failed to parse LLM response:', error);
+    console.error('[JSON Parse Error] Content:', content);
+    
+    // Try to extract JSON from markdown code blocks
+    const jsonMatch = content.match(/```(?:json)?\s*([\s\S]*?)```/);
+    if (jsonMatch) {
+      try {
+        return JSON.parse(jsonMatch[1].trim());
+      } catch (e) {
+        console.error('[JSON Parse Error] Failed to parse extracted JSON:', e);
+      }
+    }
+    
+    // Return empty object as fallback
+    return { planName: 'Local Authority Growth Plan', pillars: [], roadmap: { phase1: { title: '', description: '', items: [] }, phase2: { title: '', description: '', items: [] }, phase3: { title: '', description: '', items: [] } }, pricingPackages: [] };
+  }
 }
 
 /**
@@ -807,7 +883,26 @@ Return ONLY valid JSON in this exact format:
   const content = typeof response.choices[0]?.message?.content === 'string' 
     ? response.choices[0].message.content 
     : "{}";
-  return JSON.parse(content);
+  
+  try {
+    return JSON.parse(content);
+  } catch (error) {
+    console.error('[JSON Parse Error] Failed to parse LLM response:', error);
+    console.error('[JSON Parse Error] Content:', content);
+    
+    // Try to extract JSON from markdown code blocks
+    const jsonMatch = content.match(/```(?:json)?\s*([\s\S]*?)```/);
+    if (jsonMatch) {
+      try {
+        return JSON.parse(jsonMatch[1].trim());
+      } catch (e) {
+        console.error('[JSON Parse Error] Failed to parse extracted JSON:', e);
+      }
+    }
+    
+    // Return empty object as fallback
+    return { summary: '', keyFindings: [] };
+  }
 }
 
 /**

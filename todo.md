@@ -254,6 +254,15 @@
 - [ ] Test PDF download end-to-end
 
 
+## URGENT FIXES (Current Testing Session)
+
+- [x] Fix Python matplotlib environment issue (PYTHONPATH conflict with Python 3.13)
+- [x] Fix JSON parsing error in generateRecommendedPlan function
+- [x] Verify visual charts are generated and displayed correctly
+- [x] Test PDF download functionality with embedded images (5 charts confirmed in PDF)
+- [x] Fix PDF image embedding (filename matching, local paths, markdown filters)
+- [ ] Fix form validation issue (lead sources not persisting in UI)
+
 ## Phase 15: Complete Next Steps (User Request)
 
 ### Test Audit Completion

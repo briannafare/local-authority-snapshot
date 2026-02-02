@@ -55,7 +55,7 @@ export const appRouter = router({
         const recommendations = safeJsonParse(audit.recommendations);
         
         // Get visual URLs from audit_visuals table
-        const visualUrls = (audit as any).visuals?.map((v: any) => v.url) || [];
+        const visualUrls = (audit as any).visuals?.map((v: any) => v.imageUrl) || [];
 
         // Generate PDF
         const pdfUrl = await generatePDF({

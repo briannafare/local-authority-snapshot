@@ -1,0 +1,19 @@
+{
+  "query": "SELECT * FROM auditVisuals LIMIT 1",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user gvHM7L26eFEKLxd.root --database hmgSMMSSNJCN2iZZwVjazU --execute SELECT * FROM auditVisuals LIMIT 1",
+  "rows": [
+    {
+      "id": "1",
+      "auditId": "60009",
+      "visualType": "gbp_score_gauge",
+      "imageUrl": "https://d2xsxph8kpxj0f.cloudfront.net/100325387/hmgSMMSSNJCN2iZZwVjazU/audit-visuals/8lX1SlpaCYl1WpgXDIdgk-gbp-score-60009.png",
+      "s3Key": "audit-visuals/8lX1SlpaCYl1WpgXDIdgk-gbp-score-60009.png",
+      "description": "Google Business Profile optimization score gauge",
+      "createdAt": "2026-02-02 05:57:40"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tauditId\tvisualType\timageUrl\ts3Key\tdescription\tcreatedAt\n1\t60009\tgbp_score_gauge\thttps://d2xsxph8kpxj0f.cloudfront.net/100325387/hmgSMMSSNJCN2iZZwVjazU/audit-visuals/8lX1SlpaCYl1WpgXDIdgk-gbp-score-60009.png\taudit-visuals/8lX1SlpaCYl1WpgXDIdgk-gbp-score-60009.png\tGoogle Business Profile optimization score gauge\t2026-02-02 05:57:40\n",
+  "stderr": "",
+  "execution_time_ms": 61
+}

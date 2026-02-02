@@ -47,7 +47,7 @@ async function generateVisual(
   try {
     // Run Python script to generate image
     await execAsync(
-      `python3 /home/ubuntu/local-authority-snapshot/server/generateVisuals.py "${command}" '${dataJson}' "${tempPath}"`
+      `PYTHONPATH= PYTHONHOME= /usr/bin/python3.11 /home/ubuntu/local-authority-snapshot/server/generateVisuals.py "${command}" '${dataJson}' "${tempPath}"`
     );
 
     // Read generated file

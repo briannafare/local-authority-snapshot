@@ -1,0 +1,13 @@
+{
+  "query": "SELECT pdfUrl FROM audits WHERE id = 60009;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user gvHM7L26eFEKLxd.root --database hmgSMMSSNJCN2iZZwVjazU --execute SELECT pdfUrl FROM audits WHERE id = 60009;",
+  "rows": [
+    {
+      "pdfUrl": "https://d2xsxph8kpxj0f.cloudfront.net/100325387/hmgSMMSSNJCN2iZZwVjazU/audits/60009/report-1770012363048.pdf"
+    }
+  ],
+  "messages": [],
+  "stdout": "pdfUrl\nhttps://d2xsxph8kpxj0f.cloudfront.net/100325387/hmgSMMSSNJCN2iZZwVjazU/audits/60009/report-1770012363048.pdf\n",
+  "stderr": "",
+  "execution_time_ms": 142
+}

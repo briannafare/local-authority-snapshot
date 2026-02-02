@@ -27,36 +27,80 @@ export interface PDFGenerationInput {
  * Generate a professional PDF report with eighty5labs branding
  */
 export async function generatePDF(input: PDFGenerationInput): Promise<string> {
-  // Create markdown content for the report
-  const markdown = generateReportMarkdown(input);
-
-  // Write markdown to temporary file
-  const tempMdPath = join("/tmp", `audit-${input.auditId}-${Date.now()}.md`);
-  const tempPdfPath = join("/tmp", `audit-${input.auditId}-${Date.now()}.pdf`);
+  const timestamp = Date.now();
+  const tempDir = `/tmp/audit-${input.auditId}-${timestamp}`;
+  const tempMdPath = join(tempDir, "report.md");
+  const tempPdfPath = join(tempDir, "report.pdf");
+  const tempImagePaths: string[] = [];
 
   try {
+    // Create temp directory
+    const { mkdir } = await import("fs/promises");
+    await mkdir(tempDir, { recursive: true });
+
+    // Download all visual images to local temp files
+    console.log(`[PDF Generator] Downloading ${input.visualUrls.length} images to ${tempDir}`);
+    const localVisualUrls: string[] = [];
+    for (let i = 0; i < input.visualUrls.length; i++) {
+      const url = input.visualUrls[i];
+      // Extract filename from URL to preserve visual type information
+      const urlParts = url.split('/');
+      const originalFilename = urlParts[urlParts.length - 1];
+      const localPath = join(tempDir, originalFilename);
+      
+      try {
+        // Download image
+        console.log(`[PDF Generator] Downloading image ${i}: ${url}`);
+        const response = await fetch(url);
+        if (response.ok) {
+          const buffer = Buffer.from(await response.arrayBuffer());
+          await writeFile(localPath, buffer);
+          console.log(`[PDF Generator] Saved image to: ${localPath} (${buffer.length} bytes)`);
+          localVisualUrls.push(localPath);
+          tempImagePaths.push(localPath);
+        } else {
+          console.error(`[PDF Generator] Failed to download image (${response.status}): ${url}`);
+          localVisualUrls.push(url); // Fallback to remote URL
+        }
+      } catch (error) {
+        console.error(`[PDF Generator] Error downloading image ${url}:`, error);
+        localVisualUrls.push(url); // Fallback to remote URL
+      }
+    }
+    console.log(`[PDF Generator] Downloaded ${localVisualUrls.length} images, ${localVisualUrls.filter(u => u.startsWith('/')).length} local`);
+
+    // Create markdown content with local image paths
+    const markdown = generateReportMarkdown({ ...input, visualUrls: localVisualUrls });
+    console.log(`[PDF Generator] Generated markdown with ${localVisualUrls.length} image references`);
+
+    // Write markdown to temporary file
     await writeFile(tempMdPath, markdown, "utf-8");
+    console.log(`[PDF Generator] Wrote markdown to: ${tempMdPath}`);
 
     // Convert markdown to PDF using manus-md-to-pdf utility
-    await execAsync(`manus-md-to-pdf ${tempMdPath} ${tempPdfPath}`);
+    console.log(`[PDF Generator] Converting to PDF: ${tempMdPath} -> ${tempPdfPath}`);
+    const { stdout, stderr } = await execAsync(`manus-md-to-pdf ${tempMdPath} ${tempPdfPath}`);
+    if (stdout) console.log(`[PDF Generator] stdout:`, stdout);
+    if (stderr) console.log(`[PDF Generator] stderr:`, stderr);
 
     // Read the generated PDF
     const { readFile } = await import("fs/promises");
     const pdfBuffer = await readFile(tempPdfPath);
+    console.log(`[PDF Generator] Read PDF: ${pdfBuffer.length} bytes`);
 
     // Upload to S3
     const fileKey = `audits/${input.auditId}/report-${Date.now()}.pdf`;
     const { url } = await storagePut(fileKey, pdfBuffer, "application/pdf");
 
     // Clean up temporary files
-    await unlink(tempMdPath).catch(() => {});
-    await unlink(tempPdfPath).catch(() => {});
+    const { rm } = await import("fs/promises");
+    await rm(tempDir, { recursive: true, force: true }).catch(() => {});
 
     return url;
   } catch (error) {
     // Clean up on error
-    await unlink(tempMdPath).catch(() => {});
-    await unlink(tempPdfPath).catch(() => {});
+    const { rm } = await import("fs/promises");
+    await rm(tempDir, { recursive: true, force: true }).catch(() => {});
     throw error;
   }
 }
@@ -106,6 +150,16 @@ date: ${new Date().toLocaleDateString("en-US", { year: "numeric", month: "long",
 **Business:** ${businessName}  
 **Industry:** ${primaryNiche}  
 **Location:** ${primaryLocation}
+
+### Visibility Scores
+
+${visualUrls.filter(url => url.includes('-score-')).map(url => `
+![Score Gauge](${url})
+`).join('') || ''}
+
+${visualUrls.filter(url => url.includes('scores-comparison')).map(url => `
+![Scores Comparison](${url})
+`).join('') || ''}
 
 ### Key Findings
 
@@ -201,8 +255,8 @@ ${q.competitors && q.competitors.length > 0 ? `- Top Competitors: ${q.competitor
 ### Visual Analytics
 
 ${visualUrls.filter(url => url.includes('ranking-comparison') || url.includes('heat-map')).map(url => `
-![Visual Analytics](${url})
-`).join("\n") || ''}
+![Ranking Analysis](${url})
+`).join('\n') || ''}
 ` : ''}
 
 ---
@@ -295,6 +349,12 @@ ${followUpAnalysis.reactivationPotential || ""}
 ## 7. Revenue Recapture Summary
 
 ${revenueRecapture.estimatedMonthlyRecovery ? `**Estimated Monthly Revenue Recovery:** $${revenueRecapture.estimatedMonthlyRecovery.toLocaleString()}` : ""}
+
+### Revenue Opportunity Visualization
+
+${visualUrls.filter(url => url.includes('revenue-opportunity') || url.includes('funnel')).map(url => `
+![Revenue Analysis](${url})
+`).join('\n') || ''}
 
 ### Opportunities
 

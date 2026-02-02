@@ -1,0 +1,16 @@
+{
+  "query": "SELECT id, businessName, status, createdAt FROM audits WHERE id = 60002",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user gvHM7L26eFEKLxd.root --database hmgSMMSSNJCN2iZZwVjazU --execute SELECT id, businessName, status, createdAt FROM audits WHERE id = 60002",
+  "rows": [
+    {
+      "id": "60002",
+      "businessName": "eighty5labs",
+      "status": "completed",
+      "createdAt": "2026-02-02 05:41:16"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tbusinessName\tstatus\tcreatedAt\n60002\teighty5labs\tcompleted\t2026-02-02 05:41:16\n",
+  "stderr": "",
+  "execution_time_ms": 123
+}
