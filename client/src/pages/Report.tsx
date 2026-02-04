@@ -21,6 +21,8 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { GBPScoreChart, RankingsChart, WebsiteAnalysisChart, CompetitorChart, ROIProjectionChart } from "@/components/AuditCharts";
+import { GeoGridHeatmap } from "@/components/visualizations/GeoGridHeatmap";
+import { CompetitorRadarChart } from "@/components/visualizations/CompetitorRadarChart";
 
 export default function Report() {
   const params = useParams();
@@ -116,6 +118,8 @@ export default function Report() {
   const followUp = audit.followUpResults ? JSON.parse(audit.followUpResults) : null;
   const keyFindings = audit.keyFindings ? JSON.parse(audit.keyFindings) : [];
   const recommendations = audit.recommendations ? JSON.parse(audit.recommendations) : null;
+  const geoGridData = audit.geoGridData ? JSON.parse(audit.geoGridData) : null;
+  const deepCompetitorAnalysis = audit.deepCompetitorAnalysis ? JSON.parse(audit.deepCompetitorAnalysis) : null;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#FF6B5B]/5 via-white to-[#2DD4BF]/5">
@@ -231,6 +235,97 @@ export default function Report() {
                   </li>
                 ))}
               </ul>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* GeoGrid Heatmap - Premium Feature */}
+        {geoGridData && (
+          <Card className="mb-12 border-0 shadow-2xl bg-gradient-to-br from-white to-gray-50">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-2xl">
+                <span className="text-[#FF6B5B]">📍</span>
+                Geographic Visibility Heatmap
+              </CardTitle>
+              <CardDescription className="text-base">
+                Your search ranking across {geoGridData.gridSize}x{geoGridData.gridSize} geographic points ({geoGridData.radius || 2} miles apart)
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="bg-white rounded-lg p-6">
+                <GeoGridHeatmap data={geoGridData} />
+              </div>
+              <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="text-center p-4 bg-green-50 rounded-lg">
+                  <div className="text-3xl font-bold text-green-600">{geoGridData.visibility}%</div>
+                  <div className="text-sm text-gray-600 mt-1">Visibility Score</div>
+                </div>
+                <div className="text-center p-4 bg-blue-50 rounded-lg">
+                  <div className="text-3xl font-bold text-blue-600">{geoGridData.averageRank || 'N/A'}</div>
+                  <div className="text-sm text-gray-600 mt-1">Avg Rank</div>
+                </div>
+                <div className="text-center p-4 bg-purple-50 rounded-lg">
+                  <div className="text-3xl font-bold text-purple-600">{geoGridData.gridSize}x{geoGridData.gridSize}</div>
+                  <div className="text-sm text-gray-600 mt-1">Grid Size</div>
+                </div>
+                <div className="text-center p-4 bg-orange-50 rounded-lg">
+                  <div className="text-3xl font-bold text-orange-600">{geoGridData.radius || 2}mi</div>
+                  <div className="text-sm text-gray-600 mt-1">Spacing</div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Deep Competitor Analysis - Premium Feature */}
+        {deepCompetitorAnalysis && deepCompetitorAnalysis.radarChartData && (
+          <Card className="mb-12 border-0 shadow-2xl bg-gradient-to-br from-white to-gray-50">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-2xl">
+                <span className="text-[#2DD4BF]">📊</span>
+                10-Signal Competitor Analysis
+              </CardTitle>
+              <CardDescription className="text-base">
+                How you stack up against top {deepCompetitorAnalysis.competitors?.length || 5} competitors on key signals
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="bg-white rounded-lg p-6">
+                <CompetitorRadarChart 
+                  businessName={audit.businessName}
+                  radarData={deepCompetitorAnalysis.radarChartData}
+                  gaps={deepCompetitorAnalysis.gaps || []}
+                  overallScore={deepCompetitorAnalysis.overallScore || 0}
+                  competitivePosition={deepCompetitorAnalysis.competitivePosition || 'competitive'}
+                  summary={deepCompetitorAnalysis.summary || ''}
+                />
+              </div>
+              {deepCompetitorAnalysis.gaps && deepCompetitorAnalysis.gaps.length > 0 && (
+                <div className="mt-6 space-y-3">
+                  <h4 className="font-semibold text-lg">Priority Gaps to Close:</h4>
+                  {deepCompetitorAnalysis.gaps.slice(0, 3).map((gap: any, idx: number) => (
+                    <div key={idx} className={`p-4 rounded-lg border-l-4 ${
+                      gap.priority === 'critical' ? 'bg-red-50 border-red-500' :
+                      gap.priority === 'high' ? 'bg-orange-50 border-orange-500' :
+                      'bg-yellow-50 border-yellow-500'
+                    }`}>
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <div className="font-semibold">{gap.metric}</div>
+                          <div className="text-sm text-gray-600 mt-1">{gap.recommendation}</div>
+                        </div>
+                        <Badge variant="outline" className={`${
+                          gap.priority === 'critical' ? 'bg-red-100 text-red-800' :
+                          gap.priority === 'high' ? 'bg-orange-100 text-orange-800' :
+                          'bg-yellow-100 text-yellow-800'
+                        }`}>
+                          {gap.priority}
+                        </Badge>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </CardContent>
           </Card>
         )}

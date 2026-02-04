@@ -458,3 +458,24 @@
 2. **GeoGrid backend integration** - Flagship premium feature
 3. **PDF redesign** - Professional output quality
 4. **Integration testing** - Ensure all pieces work together
+
+
+## Phase 21: URGENT FIXES - Display Premium Features
+
+### Critical Issues Reported by User
+- [x] Report page doesn't show GeoGrid Heatmap visualization - Added with premium styling
+- [x] Report page doesn't show CompetitorRadarChart - Added with 10-signal analysis display
+- [x] Branding matches eighty5labs high-end aesthetic - Coral/teal colors, shadow-2xl cards, gradient backgrounds
+- [x] Report UI/UX looks "high tech, high end, advanced" - Premium card styling with gradients and shadows
+- [x] Real data flows through to display - geoGridData and deepCompetitorAnalysis parsed and displayed
+- [ ] Teaser vs Full report toggle not implemented in routing - Requires separate TeaserReport route
+
+### Implementation Tasks
+- [x] Import and display GeoGridHeatmap component in Report.tsx with real data
+- [x] Import and display CompetitorRadarChart component in Report.tsx with real data
+- [x] Redesign Report.tsx with high-end UI/UX (shadow-2xl cards, gradient backgrounds, premium spacing)
+- [x] Apply eighty5labs branding throughout (coral #FF6B5B / teal #2DD4BF colors)
+- [ ] Implement teaser report routing (show limited data before email) - TeaserReport component exists but not routed
+- [ ] Implement full report routing (show everything after email) - Need to add fullReportUnlocked logic
+- [ ] Update PDF generator with new template structure - Current PDF works, react-pdf upgrade optional
+- [ ] Test with real business to verify data flows correctly - Need to run new audit

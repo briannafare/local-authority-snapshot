@@ -197,7 +197,7 @@ export async function generateAuditVisuals(auditId: number, auditResults: any) {
     }
 
     // Geographic Heat Map (if ranking data available)
-    if (auditResults.seo?.rankingData?.averagePosition !== null) {
+    if (auditResults.seo?.rankingData?.averagePosition !== null && auditResults.seo?.rankingData?.averagePosition !== undefined) {
       // Generate a sample heat map grid based on average position
       const avgPos = auditResults.seo.rankingData.averagePosition || 50;
       const grid = [
