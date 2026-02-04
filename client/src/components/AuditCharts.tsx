@@ -1,15 +1,20 @@
 import { BarChart, Bar, LineChart, Line, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Cell } from 'recharts';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
-// Color palette matching the PDF charts
+// eighty5labs brand color palette
 const COLORS = {
-  primary: '#f97316', // orange-500
-  secondary: '#14b8a6', // teal-500
+  primary: '#FF6B5B', // coral (brand primary)
+  secondary: '#2DD4BF', // teal (brand secondary)
   tertiary: '#3b82f6', // blue-500
-  success: '#10b981', // green-500
-  warning: '#f59e0b', // amber-500
-  danger: '#ef4444', // red-500
-  gray: '#6b7280', // gray-500
+  success: '#22C55E', // green-500
+  warning: '#EAB308', // yellow-500
+  danger: '#EF4444', // red-500
+  gray: '#9CA3AF', // gray-400
+  // GeoGrid specific colors
+  gridGreen: '#22C55E',
+  gridYellow: '#EAB308',
+  gridRed: '#EF4444',
+  gridGray: '#9CA3AF',
 };
 
 interface GBPScoreChartProps {
@@ -53,7 +58,7 @@ export function GBPScoreChart({ score, issues, improvements }: GBPScoreChartProp
               </BarChart>
             </ResponsiveContainer>
             <div className="text-center mt-4">
-              <div className="text-4xl font-bold text-orange-500">{score}/100</div>
+              <div className="text-4xl font-bold text-[#FF6B5B]">{score}/100</div>
               <div className="text-sm text-gray-600">Optimization Score</div>
             </div>
           </div>
@@ -178,7 +183,7 @@ export function WebsiteAnalysisChart({ seoScore, technicalScore, contentScore, l
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
           {data.map((item) => (
             <div key={item.subject} className="text-center">
-              <div className="text-2xl font-bold text-orange-500">{item.score}</div>
+              <div className="text-2xl font-bold text-[#FF6B5B]">{item.score}</div>
               <div className="text-sm text-gray-600">{item.subject}</div>
             </div>
           ))}
@@ -264,9 +269,9 @@ export function ROIProjectionChart({ currentLeads, projectedLeads, avgRevenue }:
         <CardDescription>6-month revenue growth potential</CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="mb-6 p-4 bg-gradient-to-r from-orange-50 to-teal-50 rounded-lg">
+        <div className="mb-6 p-4 bg-gradient-to-r from-[#FF6B5B]/10 to-[#2DD4BF]/10 rounded-lg">
           <div className="text-center">
-            <div className="text-3xl font-bold text-orange-500">
+            <div className="text-3xl font-bold text-[#FF6B5B]">
               ${totalIncrease.toLocaleString()}
             </div>
             <div className="text-sm text-gray-600 mt-1">
@@ -305,7 +310,7 @@ export function ROIProjectionChart({ currentLeads, projectedLeads, avgRevenue }:
             <div className="text-sm text-gray-600">Projected Leads/Mo</div>
           </div>
           <div>
-            <div className="text-xl font-bold text-orange-500">+{Math.round(((projectedLeads - currentLeads) / currentLeads) * 100)}%</div>
+            <div className="text-xl font-bold text-[#FF6B5B]">+{Math.round(((projectedLeads - currentLeads) / currentLeads) * 100)}%</div>
             <div className="text-sm text-gray-600">Growth</div>
           </div>
         </div>

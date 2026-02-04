@@ -70,7 +70,22 @@ export const audits = mysqlTable("audits", {
   status: mysqlEnum("status", ["pending", "processing", "completed", "failed"]).default("pending").notNull(),
   pdfUrl: varchar("pdfUrl", { length: 512 }),
   emailSent: varchar("emailSent", { length: 255 }),
-  
+
+  // Overall scores for teaser/full report system
+  overallGrade: mysqlEnum("overallGrade", ["A", "B", "C", "D", "F"]),
+  overallScore: int("overallScore"),
+  fullReportUnlocked: int("fullReportUnlocked").default(0), // 0 = teaser only, 1 = full unlocked
+
+  // GeoGrid data (stored as JSON)
+  geoGridData: text("geoGridData"),
+
+  // Deep competitor analysis (stored as JSON)
+  deepCompetitorAnalysis: text("deepCompetitorAnalysis"),
+
+  // Go High Level integration
+  ghlContactId: varchar("ghlContactId", { length: 100 }),
+  ghlWorkflowTriggered: int("ghlWorkflowTriggered").default(0),
+
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });

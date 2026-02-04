@@ -126,8 +126,9 @@ export async function updateAudit(id: number, data: Partial<InsertAudit>) {
 export async function getAllAudits() {
   const db = await getDb();
   if (!db) return [];
-  
-  return await db.select().from(audits).orderBy(audits.createdAt);
+
+  const { desc } = await import("drizzle-orm");
+  return await db.select().from(audits).orderBy(desc(audits.createdAt));
 }
 
 // Audit visuals queries

@@ -54,9 +54,9 @@ export default function Report() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-teal-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-[#FF6B5B]/5 via-white to-[#2DD4BF]/5 flex items-center justify-center">
         <div className="text-center">
-          <Loader2 className="w-12 h-12 animate-spin text-orange-500 mx-auto mb-4" />
+          <Loader2 className="w-12 h-12 animate-spin text-[#FF6B5B] mx-auto mb-4" />
           <h2 className="text-2xl font-bold mb-2">Generating Your Audit...</h2>
           <p className="text-gray-600">
             We're analyzing your business across 6 dimensions. This may take 1-2 minutes.
@@ -68,7 +68,7 @@ export default function Report() {
 
   if (error || !audit) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-teal-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-[#FF6B5B]/5 via-white to-[#2DD4BF]/5 flex items-center justify-center">
         <div className="text-center">
           <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
           <h2 className="text-2xl font-bold mb-2">Audit Not Found</h2>
@@ -81,9 +81,9 @@ export default function Report() {
 
   if (audit.status === "processing") {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-teal-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-[#FF6B5B]/5 via-white to-[#2DD4BF]/5 flex items-center justify-center">
         <div className="text-center max-w-md">
-          <Loader2 className="w-12 h-12 animate-spin text-orange-500 mx-auto mb-4" />
+          <Loader2 className="w-12 h-12 animate-spin text-[#FF6B5B] mx-auto mb-4" />
           <h2 className="text-2xl font-bold mb-2">Analyzing {audit.businessName}...</h2>
           <p className="text-gray-600 mb-4">
             We're running a comprehensive audit across SEO, AEO, competitive visibility, lead capture, and more.
@@ -96,7 +96,7 @@ export default function Report() {
 
   if (audit.status === "failed") {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-teal-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-[#FF6B5B]/5 via-white to-[#2DD4BF]/5 flex items-center justify-center">
         <div className="text-center">
           <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
           <h2 className="text-2xl font-bold mb-2">Audit Failed</h2>
@@ -118,7 +118,7 @@ export default function Report() {
   const recommendations = audit.recommendations ? JSON.parse(audit.recommendations) : null;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-teal-50">
+    <div className="min-h-screen bg-gradient-to-br from-[#FF6B5B]/5 via-white to-[#2DD4BF]/5">
       {/* Header */}
       <header className="bg-white border-b sticky top-0 z-50">
         <div className="container py-4">
@@ -137,7 +137,7 @@ export default function Report() {
                 <Mail className="w-4 h-4 mr-2" /> Email Report
               </Button>
               <Button 
-                className="bg-orange-500 hover:bg-orange-600" 
+                className="bg-[#FF6B5B] hover:bg-[#E55A4A]" 
                 onClick={() => {
                   toast.info("Generating PDF... This may take a moment.");
                   generatePDFMutation.mutate({ auditId: audit.id });
@@ -196,7 +196,7 @@ export default function Report() {
             <Badge variant="outline" className="text-base py-1 px-3">
               {audit.primaryLocation}
             </Badge>
-            <Badge className="bg-teal-500 text-white text-base py-1 px-3">
+            <Badge className="bg-[#2DD4BF] text-white text-base py-1 px-3">
               <CheckCircle2 className="w-4 h-4 mr-1" /> Completed
             </Badge>
           </div>
@@ -218,7 +218,7 @@ export default function Report() {
           <Card className="mb-12 border-0 shadow-lg">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Target className="w-6 h-6 text-orange-500" />
+                <Target className="w-6 h-6 text-[#FF6B5B]" />
                 Key Findings at a Glance
               </CardTitle>
             </CardHeader>
@@ -226,7 +226,7 @@ export default function Report() {
               <ul className="space-y-3">
                 {keyFindings.map((finding: string, i: number) => (
                   <li key={i} className="flex items-start gap-3">
-                    <CheckCircle2 className="w-5 h-5 text-teal-500 flex-shrink-0 mt-0.5" />
+                    <CheckCircle2 className="w-5 h-5 text-[#2DD4BF] flex-shrink-0 mt-0.5" />
                     <span className="text-gray-700">{finding}</span>
                   </li>
                 ))}
@@ -286,11 +286,11 @@ export default function Report() {
 
                 {gbp.improvements && gbp.improvements.length > 0 && (
                   <div>
-                    <h4 className="font-semibold mb-3 text-teal-600">Top Improvements</h4>
+                    <h4 className="font-semibold mb-3 text-[#2DD4BF]">Top Improvements</h4>
                     <ul className="space-y-2">
                       {gbp.improvements.slice(0, 10).map((improvement: string, i: number) => (
                         <li key={i} className="flex items-start gap-2">
-                          <TrendingUp className="w-4 h-4 text-teal-500 flex-shrink-0 mt-0.5" />
+                          <TrendingUp className="w-4 h-4 text-[#2DD4BF] flex-shrink-0 mt-0.5" />
                           <span className="text-sm">{improvement}</span>
                         </li>
                       ))}
@@ -359,9 +359,9 @@ export default function Report() {
                 {seo.rankingData && (
                   <div className="space-y-4">
                     <div className="flex items-center gap-2 mb-3">
-                      <Target className="w-5 h-5 text-orange-500" />
+                      <Target className="w-5 h-5 text-[#FF6B5B]" />
                       <h4 className="font-semibold">Real Search Ranking Data</h4>
-                      <Badge variant="outline" className="bg-teal-50 text-teal-700 border-teal-200">
+                      <Badge variant="outline" className="bg-[#2DD4BF]/10 text-[#14B8A6] border-[#2DD4BF]/30">
                         Live Data
                       </Badge>
                     </div>
@@ -369,8 +369,8 @@ export default function Report() {
                     {/* Ranking Summary */}
                     <div className="grid md:grid-cols-3 gap-4">
                       {seo.rankingData.averagePosition !== null && (
-                        <div className="bg-gradient-to-br from-orange-50 to-orange-100 p-4 rounded-lg">
-                          <div className="text-2xl font-bold text-orange-600">
+                        <div className="bg-gradient-to-br from-[#FF6B5B]/10 to-[#FF6B5B]/20 p-4 rounded-lg">
+                          <div className="text-2xl font-bold text-[#FF6B5B]">
                             #{seo.rankingData.averagePosition.toFixed(1)}
                           </div>
                           <div className="text-sm text-gray-600">Average Position</div>
@@ -378,7 +378,7 @@ export default function Report() {
                       )}
                       <div className={`p-4 rounded-lg ${
                         seo.rankingData.inLocalPack 
-                          ? 'bg-gradient-to-br from-teal-50 to-teal-100' 
+                          ? 'bg-gradient-to-br from-[#2DD4BF]/10 to-[#2DD4BF]/20' 
                           : 'bg-gradient-to-br from-gray-50 to-gray-100'
                       }`}>
                         <div className="text-2xl font-bold">
@@ -419,9 +419,9 @@ export default function Report() {
                                         variant="outline" 
                                         className={`${
                                           q.position <= 3 
-                                            ? 'bg-teal-50 text-teal-700 border-teal-200' 
+                                            ? 'bg-[#2DD4BF]/10 text-[#14B8A6] border-[#2DD4BF]/30' 
                                             : q.position <= 10 
-                                            ? 'bg-orange-50 text-orange-700 border-orange-200'
+                                            ? 'bg-[#FF6B5B]/10 text-[#E55A4A] border-[#FF6B5B]/30'
                                             : 'bg-red-50 text-red-700 border-red-200'
                                         }`}
                                       >
@@ -553,11 +553,11 @@ export default function Report() {
 
                 {seo.improvements && seo.improvements.length > 0 && (
                   <div>
-                    <h4 className="font-semibold mb-3 text-teal-600">SEO Improvements</h4>
+                    <h4 className="font-semibold mb-3 text-[#2DD4BF]">SEO Improvements</h4>
                     <ul className="grid md:grid-cols-2 gap-2">
                       {seo.improvements.slice(0, 10).map((improvement: string, i: number) => (
                         <li key={i} className="flex items-start gap-2">
-                          <span className="text-teal-500">•</span>
+                          <span className="text-[#2DD4BF]">•</span>
                           <span className="text-sm">{improvement}</span>
                         </li>
                       ))}
@@ -591,7 +591,7 @@ export default function Report() {
                 <div className="grid md:grid-cols-2 gap-6">
                   {aeo.whyAIWouldRecommend && (
                     <div>
-                      <h4 className="font-semibold mb-2 text-teal-600">Why AI Would Recommend You</h4>
+                      <h4 className="font-semibold mb-2 text-[#2DD4BF]">Why AI Would Recommend You</h4>
                       <p className="text-sm text-gray-700">{aeo.whyAIWouldRecommend}</p>
                     </div>
                   )}
@@ -609,7 +609,7 @@ export default function Report() {
                     <ul className="grid md:grid-cols-2 gap-2">
                       {aeo.fixes.map((fix: string, i: number) => (
                         <li key={i} className="flex items-start gap-2">
-                          <Zap className="w-4 h-4 text-orange-500 flex-shrink-0 mt-0.5" />
+                          <Zap className="w-4 h-4 text-[#FF6B5B] flex-shrink-0 mt-0.5" />
                           <span className="text-sm">{fix}</span>
                         </li>
                       ))}
@@ -642,7 +642,7 @@ export default function Report() {
                   <ul className="space-y-2">
                     {competitive.reasonsCompetitorsRank.map((reason: string, i: number) => (
                       <li key={i} className="flex items-start gap-2">
-                        <span className="text-orange-500 font-bold">{i + 1}.</span>
+                        <span className="text-[#FF6B5B] font-bold">{i + 1}.</span>
                         <span className="text-sm">{reason}</span>
                       </li>
                     ))}
@@ -697,7 +697,7 @@ export default function Report() {
                             <td className="py-2">
                               <Badge
                                 variant={ch.riskLevel === "High" ? "destructive" : "outline"}
-                                className={ch.riskLevel === "Medium" ? "bg-orange-100 text-orange-800" : ""}
+                                className={ch.riskLevel === "Medium" ? "bg-[#FF6B5B]/15 text-[#E55A4A]" : ""}
                               >
                                 {ch.riskLevel}
                               </Badge>
@@ -712,11 +712,11 @@ export default function Report() {
 
               {leadCapture.aiVoiceOpportunities && leadCapture.aiVoiceOpportunities.length > 0 && (
                 <div>
-                  <h4 className="font-semibold mb-3 text-teal-600">AI Voice Agent Opportunities</h4>
+                  <h4 className="font-semibold mb-3 text-[#2DD4BF]">AI Voice Agent Opportunities</h4>
                   <ul className="space-y-2">
                     {leadCapture.aiVoiceOpportunities.map((opp: string, i: number) => (
                       <li key={i} className="flex items-start gap-2">
-                        <CheckCircle2 className="w-4 h-4 text-teal-500 flex-shrink-0 mt-0.5" />
+                        <CheckCircle2 className="w-4 h-4 text-[#2DD4BF] flex-shrink-0 mt-0.5" />
                         <span className="text-sm">{opp}</span>
                       </li>
                     ))}
@@ -726,11 +726,11 @@ export default function Report() {
 
               {leadCapture.conversationAIOpportunities && leadCapture.conversationAIOpportunities.length > 0 && (
                 <div>
-                  <h4 className="font-semibold mb-3 text-orange-600">Conversation AI Widget Opportunities</h4>
+                  <h4 className="font-semibold mb-3 text-[#FF6B5B]">Conversation AI Widget Opportunities</h4>
                   <ul className="space-y-2">
                     {leadCapture.conversationAIOpportunities.map((opp: string, i: number) => (
                       <li key={i} className="flex items-start gap-2">
-                        <CheckCircle2 className="w-4 h-4 text-orange-500 flex-shrink-0 mt-0.5" />
+                        <CheckCircle2 className="w-4 h-4 text-[#FF6B5B] flex-shrink-0 mt-0.5" />
                         <span className="text-sm">{opp}</span>
                       </li>
                     ))}
@@ -754,7 +754,7 @@ export default function Report() {
 
         {/* Revenue Recapture Summary */}
         {recommendations?.revenueRecapture && (
-          <Card className="mb-12 border-0 shadow-lg bg-gradient-to-br from-orange-50 to-teal-50">
+          <Card className="mb-12 border-0 shadow-lg bg-gradient-to-br from-[#FF6B5B]/10 to-[#2DD4BF]/10">
             <CardHeader>
               <CardTitle className="text-2xl">Revenue Recapture Summary</CardTitle>
               <CardDescription>Key opportunities to capture more revenue</CardDescription>
@@ -763,7 +763,7 @@ export default function Report() {
               {recommendations.revenueRecapture.estimatedMonthlyRecovery && (
                 <div className="bg-white rounded-lg p-6 mb-6 text-center">
                   <p className="text-sm text-gray-600 mb-2">Estimated Monthly Revenue Recovery</p>
-                  <p className="text-5xl font-bold text-orange-500">
+                  <p className="text-5xl font-bold text-[#FF6B5B]">
                     ${recommendations.revenueRecapture.estimatedMonthlyRecovery.toLocaleString()}
                   </p>
                   <p className="text-xs text-gray-500 mt-2">Based on current lead volume and conversion gaps</p>
@@ -789,7 +789,7 @@ export default function Report() {
                           <td className="py-3 px-4">
                             <Badge
                               variant={opp.impactLevel === "High" ? "destructive" : "outline"}
-                              className={opp.impactLevel === "Medium" ? "bg-orange-100 text-orange-800" : ""}
+                              className={opp.impactLevel === "Medium" ? "bg-[#FF6B5B]/15 text-[#E55A4A]" : ""}
                             >
                               {opp.impactLevel}
                             </Badge>
@@ -823,7 +823,7 @@ export default function Report() {
                       <ul className="space-y-1">
                         {pillar.outcomes.map((outcome: string, j: number) => (
                           <li key={j} className="flex items-start gap-2 text-sm">
-                            <CheckCircle2 className="w-4 h-4 text-teal-500 flex-shrink-0 mt-0.5" />
+                            <CheckCircle2 className="w-4 h-4 text-[#2DD4BF] flex-shrink-0 mt-0.5" />
                             <span>{outcome}</span>
                           </li>
                         ))}
@@ -848,7 +848,7 @@ export default function Report() {
                       <ul className="space-y-1">
                         {phase.items.map((item: string, i: number) => (
                           <li key={i} className="flex items-start gap-2 text-sm">
-                            <span className="text-orange-500">•</span>
+                            <span className="text-[#FF6B5B]">•</span>
                             <span>{item}</span>
                           </li>
                         ))}
@@ -865,19 +865,19 @@ export default function Report() {
                 <h3 className="text-2xl font-bold mb-6">Investment Options</h3>
                 <div className="grid md:grid-cols-3 gap-6">
                   {recommendations.recommendedPlan.pricingPackages.map((pkg: any, i: number) => (
-                    <Card key={i} className="border-2 border-gray-200 hover:border-orange-500 transition-colors">
+                    <Card key={i} className="border-2 border-gray-200 hover:border-[#FF6B5B] transition-colors">
                       <CardHeader>
                         <CardTitle className="text-xl">{pkg.name}</CardTitle>
                         <CardDescription>{pkg.focus}</CardDescription>
                       </CardHeader>
                       <CardContent>
                         <div className="mb-4">
-                          <p className="text-2xl font-bold text-orange-500">{pkg.investmentRange}</p>
+                          <p className="text-2xl font-bold text-[#FF6B5B]">{pkg.investmentRange}</p>
                         </div>
                         <ul className="space-y-2 mb-4">
                           {pkg.includes.map((item: string, j: number) => (
                             <li key={j} className="flex items-start gap-2 text-sm">
-                              <CheckCircle2 className="w-4 h-4 text-teal-500 flex-shrink-0 mt-0.5" />
+                              <CheckCircle2 className="w-4 h-4 text-[#2DD4BF] flex-shrink-0 mt-0.5" />
                               <span>{item}</span>
                             </li>
                           ))}
@@ -893,13 +893,13 @@ export default function Report() {
         )}
 
         {/* CTA */}
-        <Card className="border-0 shadow-lg bg-gradient-to-br from-teal-500 to-teal-600 text-white">
+        <Card className="border-0 shadow-lg bg-gradient-to-br from-[#2DD4BF] to-[#14B8A6] text-white">
           <CardContent className="py-12 text-center">
             <h3 className="text-3xl font-bold mb-4">Ready to Recapture Your Revenue?</h3>
-            <p className="text-xl mb-8 text-teal-50">
+            <p className="text-xl mb-8 text-white/80">
               Let's turn these insights into results. Schedule a strategy call with eighty5labs.
             </p>
-            <Button size="lg" className="bg-white text-teal-600 hover:bg-gray-100 text-lg px-8 py-6">
+            <Button size="lg" className="bg-white text-[#2DD4BF] hover:bg-gray-100 text-lg px-8 py-6">
               Schedule Strategy Call
             </Button>
           </CardContent>
@@ -973,8 +973,8 @@ export default function Report() {
 
 function ScoreCard({ title, score, description }: { title: string; score: number; description: string }) {
   const getColor = (score: number) => {
-    if (score >= 70) return "text-teal-600";
-    if (score >= 40) return "text-orange-500";
+    if (score >= 70) return "text-[#2DD4BF]";
+    if (score >= 40) return "text-[#FF6B5B]";
     return "text-red-500";
   };
 

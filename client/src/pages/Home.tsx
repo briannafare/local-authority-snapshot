@@ -16,19 +16,19 @@ export default function Home() {
   const [, setLocation] = useLocation();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-teal-50">
+    <div className="min-h-screen bg-gradient-to-br from-[#FF6B5B]/5 via-white to-[#2DD4BF]/5">
       {/* Header */}
       <header className="border-b bg-white/80 backdrop-blur-sm sticky top-0 z-50">
         <div className="container py-4 flex justify-between items-center">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-gradient-to-br from-orange-500 to-teal-500 rounded-sm flex items-center justify-center">
+            <div className="w-8 h-8 bg-gradient-to-br from-[#FF6B5B] to-[#2DD4BF] rounded-sm flex items-center justify-center">
               <div className="w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-b-[10px] border-b-white" />
             </div>
             <span className="text-xl font-bold">eighty5labs</span>
           </div>
           <Button 
             onClick={() => setLocation("/audit")}
-            className="bg-orange-500 hover:bg-orange-600 text-white font-semibold"
+            className="bg-[#FF6B5B] hover:bg-[#E55A4A] text-white font-semibold"
           >
             Get Your Free Audit
           </Button>
@@ -49,7 +49,7 @@ export default function Home() {
         <Button 
           onClick={() => setLocation("/audit")}
           size="lg"
-          className="bg-orange-500 hover:bg-orange-600 text-white text-lg px-8 py-6 rounded-full font-semibold"
+          className="bg-[#FF6B5B] hover:bg-[#E55A4A] text-white text-lg px-8 py-6 rounded-full font-semibold"
         >
           Get Your Free Audit <ArrowRight className="ml-2" />
         </Button>
@@ -79,7 +79,7 @@ export default function Home() {
       <section className="bg-white py-16">
         <div className="container">
           <div className="flex items-center gap-2 mb-4">
-            <div className="w-2 h-2 rounded-full bg-teal-500" />
+            <div className="w-2 h-2 rounded-full bg-[#2DD4BF]" />
             <span className="text-sm font-medium text-gray-500 uppercase tracking-wider">The Reality</span>
           </div>
           <h2 className="text-4xl md:text-5xl font-bold mb-6 max-w-3xl">
@@ -108,37 +108,37 @@ export default function Home() {
               icon: Search,
               title: "SEO + AEO Visibility",
               description: "How often you appear when ideal customers search—in Google AND in AI tools like ChatGPT.",
-              color: "text-orange-500",
+              color: "text-[#FF6B5B]",
             },
             {
               icon: Target,
               title: "Competitive Position",
               description: "Why competitors outrank you and what trust signals they have that you don't.",
-              color: "text-teal-500",
+              color: "text-[#2DD4BF]",
             },
             {
               icon: TrendingUp,
               title: "Website Conversion",
               description: "Whether visitors know what to do next and how easy it is to contact or book.",
-              color: "text-orange-500",
+              color: "text-[#FF6B5B]",
             },
             {
               icon: MessageSquare,
               title: "Lead Capture & Response",
               description: "How many calls and messages slip through gaps and how fast you respond.",
-              color: "text-teal-500",
+              color: "text-[#2DD4BF]",
             },
             {
               icon: Users,
               title: "Follow-Up Systems",
               description: "Whether leads get one attempt or structured, multi-touch nurture sequences.",
-              color: "text-orange-500",
+              color: "text-[#FF6B5B]",
             },
             {
               icon: BarChart3,
               title: "Revenue Opportunity",
               description: "Specific, dollar-value estimates of what fixing these gaps could mean for your business.",
-              color: "text-teal-500",
+              color: "text-[#2DD4BF]",
             },
           ].map((item, i) => (
             <Card key={i} className="border-0 shadow-lg hover:shadow-xl transition-shadow">
@@ -153,11 +153,11 @@ export default function Home() {
       </section>
 
       {/* What You Get */}
-      <section className="bg-gradient-to-br from-teal-500 to-teal-600 text-white py-20">
+      <section className="bg-gradient-to-br from-[#2DD4BF] to-[#14B8A6] text-white py-20">
         <div className="container">
           <div className="text-center mb-12">
             <h2 className="text-4xl font-bold mb-4">What You Get</h2>
-            <p className="text-xl text-teal-100">
+            <p className="text-xl text-white/80">
               A comprehensive, data-driven revenue recapture report
             </p>
           </div>
@@ -194,7 +194,7 @@ export default function Home() {
         <Button 
           onClick={() => setLocation("/audit")}
           size="lg"
-          className="bg-orange-500 hover:bg-orange-600 text-white text-lg px-8 py-6 rounded-full font-semibold"
+          className="bg-[#FF6B5B] hover:bg-[#E55A4A] text-white text-lg px-8 py-6 rounded-full font-semibold"
         >
           Get Your Free Audit <ArrowRight className="ml-2" />
         </Button>

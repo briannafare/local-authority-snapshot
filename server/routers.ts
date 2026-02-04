@@ -168,6 +168,21 @@ export const appRouter = router({
               });
             }
             
+            // Calculate overall grade and score
+            const scores = [
+              results.gbp?.score || 0,
+              results.seo?.score || 0,
+              results.aeo?.score || 0,
+            ].filter(s => s > 0);
+            const overallScore = scores.length > 0
+              ? Math.round(scores.reduce((a: number, b: number) => a + b, 0) / scores.length)
+              : 50;
+            const overallGrade: "A" | "B" | "C" | "D" | "F" =
+              overallScore >= 80 ? "A" :
+              overallScore >= 65 ? "B" :
+              overallScore >= 50 ? "C" :
+              overallScore >= 35 ? "D" : "F";
+
             // Update audit with results
             await updateAudit(auditId, {
               gbpAuditResults: JSON.stringify(results.gbp),
@@ -182,8 +197,37 @@ export const appRouter = router({
                 revenueRecapture: results.revenueRecapture,
                 recommendedPlan: results.recommendedPlan,
               }),
+              overallGrade,
+              overallScore,
               status: "completed",
             });
+
+            // Process GHL integration if email was provided
+            if (input.email) {
+              try {
+                const { processAuditForGHL } = await import("./ghlService");
+                const ghlResult = await processAuditForGHL({
+                  email: input.email,
+                  businessName: input.businessName,
+                  location: input.primaryLocation,
+                  niche: input.primaryNiche,
+                  auditId,
+                  reportUrl: `${process.env.APP_URL || ''}/report/${auditId}`,
+                  overallGrade,
+                  overallScore,
+                  keyFindings: results.executiveSummary.keyFindings || [],
+                });
+
+                if (ghlResult.contactId) {
+                  await updateAudit(auditId, {
+                    ghlContactId: ghlResult.contactId,
+                    ghlWorkflowTriggered: ghlResult.workflowTriggered ? 1 : 0,
+                  });
+                }
+              } catch (ghlError) {
+                console.error("[GHL] Integration error (non-fatal):", ghlError);
+              }
+            }
           })
           .catch(async (error) => {
             console.error("[Audit] Failed to complete audit:", error);
@@ -198,7 +242,13 @@ export const appRouter = router({
         const { getAuditById } = await import("./db");
         return await getAuditById(input.id);
       }),
-    
+
+    listAll: publicProcedure
+      .query(async () => {
+        const { getAllAudits } = await import("./db");
+        return await getAllAudits();
+      }),
+
     sendEmail: publicProcedure
       .input(
         z.object({
