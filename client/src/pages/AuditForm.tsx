@@ -126,40 +126,52 @@ export default function AuditForm() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#FF6B5B]/5 via-white to-[#2DD4BF]/5">
-      <div className="container py-12 max-w-4xl">
+      <div className="container py-16 max-w-4xl">
         {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold mb-2">Local Authority Snapshot</h1>
-          <p className="text-lg text-gray-600">
+        <div className="text-center mb-12 animate-in fade-in duration-700">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-[#FF6B5B]/10 to-[#2DD4BF]/10 border border-[#FF6B5B]/20 mb-6">
+            <span className="text-sm font-medium text-gray-700">Free Revenue Audit</span>
+          </div>
+          <h1 className="text-5xl md:text-6xl font-extrabold mb-4 bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent tracking-tight">
+            Local Authority Snapshot
+          </h1>
+          <p className="text-xl text-gray-600 leading-relaxed">
             Discover hidden revenue opportunities in your local business
           </p>
         </div>
 
         {/* Progress Bar */}
-        <div className="mb-8">
-          <div className="flex justify-between mb-2">
-            <span className="text-sm font-medium">Step {currentStep} of 3</span>
-            <span className="text-sm text-gray-600">{Math.round(progress)}% Complete</span>
+        <div className="mb-10 animate-in slide-in-from-top duration-500">
+          <div className="flex justify-between mb-3">
+            <span className="text-sm font-bold text-gray-900">Step {currentStep} of 3</span>
+            <span className="text-sm font-semibold text-[#FF6B5B]">{Math.round(progress)}% Complete</span>
           </div>
-          <Progress value={progress} className="h-2" />
+          <div className="relative h-3 bg-gray-100 rounded-full overflow-hidden shadow-inner">
+            <div 
+              className="absolute top-0 left-0 h-full bg-gradient-to-r from-[#FF6B5B] to-[#2DD4BF] rounded-full transition-all duration-500 ease-out shadow-lg"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
         </div>
 
         {/* Step Indicator */}
-        <div className="flex justify-between mb-8">
+        <div className="flex justify-between mb-12 animate-in slide-in-from-top duration-700">
           {[1, 2, 3].map((step) => (
-            <div key={step} className="flex items-center">
+            <div key={step} className="flex flex-col items-center flex-1">
               <div
-                className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold ${
+                className={`w-14 h-14 rounded-full flex items-center justify-center font-bold text-lg shadow-lg transition-all duration-300 ${
                   step < currentStep
-                    ? "bg-[#2DD4BF] text-white"
+                    ? "bg-gradient-to-br from-[#2DD4BF] to-[#14B8A6] text-white scale-100"
                     : step === currentStep
-                    ? "bg-[#FF6B5B] text-white"
-                    : "bg-gray-200 text-gray-500"
+                    ? "bg-gradient-to-br from-[#FF6B5B] to-[#E55A4A] text-white scale-110 shadow-xl"
+                    : "bg-gray-100 text-gray-400 scale-95"
                 }`}
               >
-                {step < currentStep ? <CheckCircle2 className="w-6 h-6" /> : step}
+                {step < currentStep ? <CheckCircle2 className="w-7 h-7" /> : step}
               </div>
-              <span className="ml-2 text-sm font-medium hidden sm:inline">
+              <span className={`mt-3 text-sm font-semibold text-center transition-colors ${
+                step <= currentStep ? "text-gray-900" : "text-gray-400"
+              }`}>
                 {step === 1 && "Business Basics"}
                 {step === 2 && "Current Marketing"}
                 {step === 3 && "Goals & Pain Points"}
@@ -169,14 +181,14 @@ export default function AuditForm() {
         </div>
 
         {/* Form Steps */}
-        <Card>
-          <CardHeader>
-            <CardTitle>
+        <Card className="shadow-2xl border-0 animate-in fade-in slide-in-from-bottom duration-700">
+          <CardHeader className="pb-8">
+            <CardTitle className="text-3xl font-extrabold text-gray-900">
               {currentStep === 1 && "Tell us about your business"}
               {currentStep === 2 && "Current marketing & operations"}
               {currentStep === 3 && "Goals & challenges"}
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-lg text-gray-600 mt-2">
               {currentStep === 1 && "Basic information to personalize your audit"}
               {currentStep === 2 && "Help us understand your current setup"}
               {currentStep === 3 && "What you want to achieve and overcome"}
