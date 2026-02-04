@@ -299,7 +299,7 @@ export default function Dashboard() {
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => setLocation(`/report/${audit.id}`)}
+                            onClick={() => setLocation(`/report/${audit.id}?full=true`)}
                             title="View Report"
                           >
                             <Eye className="w-4 h-4" />
