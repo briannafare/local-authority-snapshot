@@ -125,7 +125,7 @@ export default function AuditForm() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-teal-50">
+    <div className="min-h-screen bg-gradient-to-br from-[#FF6B5B]/5 via-white to-[#2DD4BF]/5">
       <div className="container py-12 max-w-4xl">
         {/* Header */}
         <div className="text-center mb-8">
@@ -151,9 +151,9 @@ export default function AuditForm() {
               <div
                 className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold ${
                   step < currentStep
-                    ? "bg-teal-500 text-white"
+                    ? "bg-[#2DD4BF] text-white"
                     : step === currentStep
-                    ? "bg-orange-500 text-white"
+                    ? "bg-[#FF6B5B] text-white"
                     : "bg-gray-200 text-gray-500"
                 }`}
               >
@@ -273,7 +273,7 @@ function Step1Form({ onNext, defaultValues }: { onNext: (data: Step1Data) => voi
       )}
 
       <div className="flex justify-end">
-        <Button type="submit" className="bg-orange-500 hover:bg-orange-600">
+        <Button type="submit" className="bg-[#FF6B5B] hover:bg-[#E55A4A]">
           Next Step <ArrowRight className="ml-2 w-4 h-4" />
         </Button>
       </div>
@@ -336,7 +336,7 @@ function Step2Form({
               type="button"
               variant={leadSources.includes(source) ? "default" : "outline"}
               onClick={() => toggleLeadSource(source)}
-              className={leadSources.includes(source) ? "bg-teal-500 hover:bg-teal-600" : ""}
+              className={leadSources.includes(source) ? "bg-[#2DD4BF] hover:bg-[#14B8A6]" : ""}
             >
               {source}
             </Button>
@@ -467,7 +467,7 @@ function Step2Form({
         <Button type="button" variant="outline" onClick={onBack}>
           <ArrowLeft className="mr-2 w-4 h-4" /> Back
         </Button>
-        <Button type="submit" className="bg-orange-500 hover:bg-orange-600">
+        <Button type="submit" className="bg-[#FF6B5B] hover:bg-[#E55A4A]">
           Next Step <ArrowRight className="ml-2 w-4 h-4" />
         </Button>
       </div>
@@ -542,7 +542,7 @@ function Step3Form({
               type="button"
               variant={businessGoals.includes(goal) ? "default" : "outline"}
               onClick={() => toggleGoal(goal)}
-              className={businessGoals.includes(goal) ? "bg-teal-500 hover:bg-teal-600" : ""}
+              className={businessGoals.includes(goal) ? "bg-[#2DD4BF] hover:bg-[#14B8A6]" : ""}
             >
               {goal}
             </Button>
@@ -560,7 +560,7 @@ function Step3Form({
               type="button"
               variant={painPoints.includes(point) ? "default" : "outline"}
               onClick={() => togglePainPoint(point)}
-              className={painPoints.includes(point) ? "bg-orange-500 hover:bg-orange-600" : ""}
+              className={painPoints.includes(point) ? "bg-[#FF6B5B] hover:bg-[#E55A4A]" : ""}
             >
               {point}
             </Button>
@@ -583,8 +583,8 @@ function Step3Form({
         {errors.email && <p className="text-sm text-red-500 mt-1">{errors.email.message}</p>}
       </div>
 
-      <div className="bg-teal-50 border border-teal-200 rounded-lg p-4">
-        <p className="text-sm text-teal-900">
+      <div className="bg-[#2DD4BF]/10 border border-[#2DD4BF]/30 rounded-lg p-4">
+        <p className="text-sm text-gray-900">
           <strong>What happens next?</strong> We'll analyze your business across 6 dimensions (SEO, AEO, competitive
           visibility, lead capture, conversion, and follow-up) and generate a comprehensive revenue recapture report
           with specific, actionable recommendations.
@@ -595,7 +595,7 @@ function Step3Form({
         <Button type="button" variant="outline" onClick={onBack} disabled={isSubmitting}>
           <ArrowLeft className="mr-2 w-4 h-4" /> Back
         </Button>
-        <Button type="submit" className="bg-orange-500 hover:bg-orange-600" disabled={isSubmitting}>
+        <Button type="submit" className="bg-[#FF6B5B] hover:bg-[#E55A4A]" disabled={isSubmitting}>
           {isSubmitting ? (
             <>
               <Loader2 className="mr-2 w-4 h-4 animate-spin" /> Generating Report...

@@ -1,5 +1,6 @@
 import axios from "axios";
 import * as cheerio from "cheerio";
+import { searchCompetitors as searchCompetitorsPlaces, searchBusinessExtended } from "./googlePlacesAPI";
 
 export interface CompetitorData {
   name: string;
@@ -15,6 +16,43 @@ export interface CompetitiveAnalysisResult {
   yourPosition: number | null;
   totalResults: number;
   error: string | null;
+}
+
+// 10-Signal Competitor Analysis Types
+export interface CompetitorSignals {
+  name: string;
+  placeId?: string;
+  reviewCount: number;
+  reviewRating: number;
+  reviewVelocity: number; // estimated reviews per month
+  photoCount: number;
+  gbpCompleteness: number;
+  websiteSpeed: number | null; // ms response time, null if unavailable
+  yearsInBusiness: number | null;
+  responseRate: number; // estimated based on review responses
+  postFrequency: number; // estimated posts per month
+  categoryMatchStrength: number; // 0-100 how well categories match the search
+}
+
+export interface DeepCompetitorAnalysis {
+  business: CompetitorSignals;
+  competitors: CompetitorSignals[];
+  radarChartData: {
+    metric: string;
+    business: number;
+    avgCompetitor: number;
+    topCompetitor: number;
+    fullMark: number;
+  }[];
+  gaps: {
+    metric: string;
+    gap: number;
+    recommendation: string;
+    priority: 'critical' | 'high' | 'medium' | 'low';
+  }[];
+  overallScore: number;
+  competitivePosition: 'leader' | 'competitive' | 'lagging' | 'critical';
+  summary: string;
 }
 
 /**
@@ -277,4 +315,357 @@ export function generateCompetitiveRecommendations(
   }
 
   return recommendations;
+}
+
+/**
+ * Deep 10-Signal Competitor Analysis
+ * Analyzes business against top 5 competitors on 10 key signals
+ */
+export async function analyzeCompetitorsDeeply(
+  businessName: string,
+  category: string,
+  location: string
+): Promise<DeepCompetitorAnalysis> {
+  console.log(`[Deep Competitor Analysis] Starting analysis for ${businessName} in ${category}, ${location}`);
+
+  // Get business data
+  const businessData = await searchBusinessExtended(businessName, location);
+
+  // Get top competitors from Google Places
+  const competitorResults = await searchCompetitorsPlaces(category, location, 6);
+
+  // Filter out the business itself from competitors
+  const competitorPlaces = competitorResults.filter(
+    c => !c.name?.toLowerCase().includes(businessName.toLowerCase())
+  ).slice(0, 5);
+
+  // Build business signals
+  const businessSignals = buildSignalsFromGBP(businessData, businessName);
+
+  // Build competitor signals (simplified - in production would fetch each competitor's full data)
+  const competitorSignals: CompetitorSignals[] = competitorPlaces.map(comp => ({
+    name: comp.name || 'Unknown',
+    placeId: comp.placeId,
+    reviewCount: comp.reviewCount || 0,
+    reviewRating: comp.rating || 0,
+    reviewVelocity: estimateReviewVelocity(comp.reviewCount || 0),
+    photoCount: 5, // Default estimate
+    gbpCompleteness: comp.rating && comp.reviewCount ? 70 : 50, // Estimate
+    websiteSpeed: null,
+    yearsInBusiness: null,
+    responseRate: 50, // Default estimate
+    postFrequency: 2, // Default estimate
+    categoryMatchStrength: 80, // High match since they appeared in search
+  }));
+
+  // Calculate averages and top values
+  const avgCompetitor = calculateAverageSignals(competitorSignals);
+  const topCompetitor = calculateTopSignals(competitorSignals);
+
+  // Build radar chart data
+  const radarChartData = buildRadarChartData(businessSignals, avgCompetitor, topCompetitor);
+
+  // Identify gaps and recommendations
+  const gaps = identifyGaps(businessSignals, avgCompetitor, topCompetitor);
+
+  // Calculate overall score and position
+  const { overallScore, competitivePosition } = calculateCompetitivePosition(businessSignals, avgCompetitor, topCompetitor);
+
+  // Generate summary
+  const summary = generateCompetitiveSummary(businessName, competitivePosition, gaps);
+
+  return {
+    business: businessSignals,
+    competitors: competitorSignals,
+    radarChartData,
+    gaps,
+    overallScore,
+    competitivePosition,
+    summary,
+  };
+}
+
+/**
+ * Build signals from GBP extended data
+ */
+function buildSignalsFromGBP(data: any, businessName: string): CompetitorSignals {
+  return {
+    name: data.name || businessName,
+    placeId: data.placeId,
+    reviewCount: data.totalReviews || 0,
+    reviewRating: data.rating || 0,
+    reviewVelocity: estimateReviewVelocity(data.totalReviews || 0),
+    photoCount: data.photoCount || 0,
+    gbpCompleteness: data.completenessScore || 50,
+    websiteSpeed: null, // Would need separate website speed test
+    yearsInBusiness: null, // Not available from Places API
+    responseRate: estimateResponseRate(data.recentReviews),
+    postFrequency: 0, // Not available from Places API
+    categoryMatchStrength: 100, // It's the target business
+  };
+}
+
+/**
+ * Estimate review velocity based on total reviews
+ * Assumes average business age of 3 years
+ */
+function estimateReviewVelocity(totalReviews: number): number {
+  const estimatedMonths = 36; // 3 years
+  return Math.round((totalReviews / estimatedMonths) * 10) / 10;
+}
+
+/**
+ * Estimate response rate from recent reviews
+ */
+function estimateResponseRate(reviews?: any[]): number {
+  if (!reviews || reviews.length === 0) return 0;
+  // In a real implementation, we'd check for owner responses
+  // For now, estimate based on rating
+  const avgRating = reviews.reduce((sum, r) => sum + (r.rating || 0), 0) / reviews.length;
+  return avgRating >= 4.5 ? 80 : avgRating >= 4.0 ? 60 : avgRating >= 3.5 ? 40 : 20;
+}
+
+/**
+ * Calculate average signals across competitors
+ */
+function calculateAverageSignals(competitors: CompetitorSignals[]): CompetitorSignals {
+  if (competitors.length === 0) {
+    return createEmptySignals('Average Competitor');
+  }
+
+  return {
+    name: 'Average Competitor',
+    reviewCount: Math.round(avg(competitors.map(c => c.reviewCount))),
+    reviewRating: Math.round(avg(competitors.map(c => c.reviewRating)) * 10) / 10,
+    reviewVelocity: Math.round(avg(competitors.map(c => c.reviewVelocity)) * 10) / 10,
+    photoCount: Math.round(avg(competitors.map(c => c.photoCount))),
+    gbpCompleteness: Math.round(avg(competitors.map(c => c.gbpCompleteness))),
+    websiteSpeed: null,
+    yearsInBusiness: null,
+    responseRate: Math.round(avg(competitors.map(c => c.responseRate))),
+    postFrequency: Math.round(avg(competitors.map(c => c.postFrequency)) * 10) / 10,
+    categoryMatchStrength: Math.round(avg(competitors.map(c => c.categoryMatchStrength))),
+  };
+}
+
+/**
+ * Calculate top (best) signals across competitors
+ */
+function calculateTopSignals(competitors: CompetitorSignals[]): CompetitorSignals {
+  if (competitors.length === 0) {
+    return createEmptySignals('Top Competitor');
+  }
+
+  return {
+    name: 'Top Competitor',
+    reviewCount: Math.max(...competitors.map(c => c.reviewCount)),
+    reviewRating: Math.max(...competitors.map(c => c.reviewRating)),
+    reviewVelocity: Math.max(...competitors.map(c => c.reviewVelocity)),
+    photoCount: Math.max(...competitors.map(c => c.photoCount)),
+    gbpCompleteness: Math.max(...competitors.map(c => c.gbpCompleteness)),
+    websiteSpeed: null,
+    yearsInBusiness: null,
+    responseRate: Math.max(...competitors.map(c => c.responseRate)),
+    postFrequency: Math.max(...competitors.map(c => c.postFrequency)),
+    categoryMatchStrength: Math.max(...competitors.map(c => c.categoryMatchStrength)),
+  };
+}
+
+function createEmptySignals(name: string): CompetitorSignals {
+  return {
+    name,
+    reviewCount: 0,
+    reviewRating: 0,
+    reviewVelocity: 0,
+    photoCount: 0,
+    gbpCompleteness: 0,
+    websiteSpeed: null,
+    yearsInBusiness: null,
+    responseRate: 0,
+    postFrequency: 0,
+    categoryMatchStrength: 0,
+  };
+}
+
+function avg(numbers: number[]): number {
+  if (numbers.length === 0) return 0;
+  return numbers.reduce((a, b) => a + b, 0) / numbers.length;
+}
+
+/**
+ * Build radar chart data for visualization
+ */
+function buildRadarChartData(
+  business: CompetitorSignals,
+  avgComp: CompetitorSignals,
+  topComp: CompetitorSignals
+): DeepCompetitorAnalysis['radarChartData'] {
+  const metrics = [
+    { key: 'reviewCount', label: 'Review Count', max: 200 },
+    { key: 'reviewRating', label: 'Rating', max: 5 },
+    { key: 'reviewVelocity', label: 'Review Velocity', max: 10 },
+    { key: 'photoCount', label: 'Photo Count', max: 30 },
+    { key: 'gbpCompleteness', label: 'GBP Completeness', max: 100 },
+    { key: 'responseRate', label: 'Response Rate', max: 100 },
+    { key: 'postFrequency', label: 'Post Frequency', max: 10 },
+  ];
+
+  return metrics.map(m => {
+    const key = m.key as keyof CompetitorSignals;
+    const bizValue = (business[key] as number) || 0;
+    const avgValue = (avgComp[key] as number) || 0;
+    const topValue = (topComp[key] as number) || 0;
+
+    // Normalize to 0-100 scale for consistent radar chart
+    const normalize = (val: number) => Math.min(100, (val / m.max) * 100);
+
+    return {
+      metric: m.label,
+      business: Math.round(normalize(bizValue)),
+      avgCompetitor: Math.round(normalize(avgValue)),
+      topCompetitor: Math.round(normalize(topValue)),
+      fullMark: 100,
+    };
+  });
+}
+
+/**
+ * Identify gaps and generate recommendations
+ */
+function identifyGaps(
+  business: CompetitorSignals,
+  avgComp: CompetitorSignals,
+  topComp: CompetitorSignals
+): DeepCompetitorAnalysis['gaps'] {
+  const gaps: DeepCompetitorAnalysis['gaps'] = [];
+
+  // Review count gap
+  if (business.reviewCount < avgComp.reviewCount) {
+    const gap = avgComp.reviewCount - business.reviewCount;
+    gaps.push({
+      metric: 'Review Count',
+      gap: Math.round((gap / avgComp.reviewCount) * 100),
+      recommendation: `You need ${gap} more reviews to match competitors. Implement automated review requests after every service.`,
+      priority: gap > 50 ? 'critical' : gap > 20 ? 'high' : 'medium',
+    });
+  }
+
+  // Rating gap
+  if (business.reviewRating < avgComp.reviewRating && business.reviewRating > 0) {
+    const gap = avgComp.reviewRating - business.reviewRating;
+    gaps.push({
+      metric: 'Review Rating',
+      gap: Math.round(gap * 20), // Convert to percentage (0.5 = 10%)
+      recommendation: `Your rating is ${gap.toFixed(1)} stars below average. Focus on service quality and responding to negative reviews promptly.`,
+      priority: gap > 0.5 ? 'critical' : gap > 0.3 ? 'high' : 'medium',
+    });
+  }
+
+  // Photo count gap
+  if (business.photoCount < avgComp.photoCount) {
+    const gap = avgComp.photoCount - business.photoCount;
+    gaps.push({
+      metric: 'Photo Count',
+      gap: Math.round((gap / Math.max(1, avgComp.photoCount)) * 100),
+      recommendation: `Add ${gap} more photos. Include exterior, interior, team, and before/after shots.`,
+      priority: gap > 10 ? 'high' : 'medium',
+    });
+  }
+
+  // GBP Completeness gap
+  if (business.gbpCompleteness < 80) {
+    gaps.push({
+      metric: 'GBP Completeness',
+      gap: 80 - business.gbpCompleteness,
+      recommendation: 'Complete all GBP sections: business description, services, attributes, and Q&A.',
+      priority: business.gbpCompleteness < 60 ? 'critical' : 'high',
+    });
+  }
+
+  // Review velocity gap
+  if (business.reviewVelocity < avgComp.reviewVelocity) {
+    gaps.push({
+      metric: 'Review Velocity',
+      gap: Math.round(((avgComp.reviewVelocity - business.reviewVelocity) / Math.max(0.1, avgComp.reviewVelocity)) * 100),
+      recommendation: 'Increase review generation rate with automated follow-up emails and SMS after each job.',
+      priority: 'medium',
+    });
+  }
+
+  // Sort by priority
+  const priorityOrder = { critical: 0, high: 1, medium: 2, low: 3 };
+  gaps.sort((a, b) => priorityOrder[a.priority] - priorityOrder[b.priority]);
+
+  return gaps;
+}
+
+/**
+ * Calculate overall competitive position
+ */
+function calculateCompetitivePosition(
+  business: CompetitorSignals,
+  avgComp: CompetitorSignals,
+  topComp: CompetitorSignals
+): { overallScore: number; competitivePosition: DeepCompetitorAnalysis['competitivePosition'] } {
+  // Calculate score components
+  const reviewScore = Math.min(100, (business.reviewCount / Math.max(1, topComp.reviewCount)) * 100);
+  const ratingScore = Math.min(100, (business.reviewRating / 5) * 100);
+  const photoScore = Math.min(100, (business.photoCount / Math.max(1, topComp.photoCount)) * 100);
+  const completenessScore = business.gbpCompleteness;
+  const velocityScore = Math.min(100, (business.reviewVelocity / Math.max(0.1, topComp.reviewVelocity)) * 100);
+
+  // Weighted average
+  const overallScore = Math.round(
+    reviewScore * 0.25 +
+    ratingScore * 0.30 +
+    photoScore * 0.10 +
+    completenessScore * 0.20 +
+    velocityScore * 0.15
+  );
+
+  // Determine position
+  let competitivePosition: DeepCompetitorAnalysis['competitivePosition'];
+  if (overallScore >= 80) {
+    competitivePosition = 'leader';
+  } else if (overallScore >= 60) {
+    competitivePosition = 'competitive';
+  } else if (overallScore >= 40) {
+    competitivePosition = 'lagging';
+  } else {
+    competitivePosition = 'critical';
+  }
+
+  return { overallScore, competitivePosition };
+}
+
+/**
+ * Generate competitive summary text
+ */
+function generateCompetitiveSummary(
+  businessName: string,
+  position: DeepCompetitorAnalysis['competitivePosition'],
+  gaps: DeepCompetitorAnalysis['gaps']
+): string {
+  const criticalGaps = gaps.filter(g => g.priority === 'critical');
+  const highGaps = gaps.filter(g => g.priority === 'high');
+
+  switch (position) {
+    case 'leader':
+      return `${businessName} is a market leader in local search visibility. Maintain momentum by continuing to generate reviews and keeping your GBP profile updated.`;
+
+    case 'competitive':
+      if (criticalGaps.length > 0) {
+        return `${businessName} is competitive but has ${criticalGaps.length} critical gap(s) to address: ${criticalGaps.map(g => g.metric).join(', ')}. Fixing these will significantly improve visibility.`;
+      }
+      return `${businessName} is competitive in the local market. Focus on ${highGaps.length > 0 ? highGaps[0].metric : 'consistent review generation'} to move into a leadership position.`;
+
+    case 'lagging':
+      return `${businessName} is falling behind competitors in ${criticalGaps.length + highGaps.length} key areas. Priority action needed on: ${[...criticalGaps, ...highGaps].slice(0, 3).map(g => g.metric).join(', ')}.`;
+
+    case 'critical':
+      return `${businessName} has critical visibility gaps that are significantly impacting lead generation. Immediate action required across all competitive signals, starting with ${criticalGaps[0]?.metric || 'GBP optimization'}.`;
+
+    default:
+      return `Analysis complete for ${businessName}. Review the gaps identified to improve competitive position.`;
+  }
 }
