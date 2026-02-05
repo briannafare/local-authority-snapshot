@@ -1,15 +1,14 @@
 // One-time database setup endpoint
 // Visit /api/setup to create tables, then delete this file
 
-export default async function handler(req: Request) {
-  const mysql = await import("mysql2/promise");
+import type { VercelRequest, VercelResponse } from '@vercel/node';
+import mysql from "mysql2/promise";
 
+export default async function handler(req: VercelRequest, res: VercelResponse) {
   const DATABASE_URL = process.env.DATABASE_URL;
+
   if (!DATABASE_URL) {
-    return new Response(JSON.stringify({ error: "DATABASE_URL not set" }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" },
-    });
+    return res.status(500).json({ error: "DATABASE_URL not set" });
   }
 
   try {
@@ -94,26 +93,14 @@ export default async function handler(req: Request) {
 
     await connection.end();
 
-    return new Response(
-      JSON.stringify({
-        success: true,
-        message: "Database tables created successfully! You can now delete api/setup.ts"
-      }),
-      {
-        status: 200,
-        headers: { "Content-Type": "application/json" },
-      }
-    );
+    return res.status(200).json({
+      success: true,
+      message: "Database tables created successfully! You can now delete api/setup.ts"
+    });
   } catch (error: any) {
-    return new Response(
-      JSON.stringify({
-        error: "Failed to create tables",
-        details: error.message
-      }),
-      {
-        status: 500,
-        headers: { "Content-Type": "application/json" },
-      }
-    );
+    return res.status(500).json({
+      error: "Failed to create tables",
+      details: error.message
+    });
   }
 }
