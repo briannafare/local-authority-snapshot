@@ -138,7 +138,8 @@ function extractDomain(url: string): string {
   }
 }
 
-function normalizeDomain(domain: string): string {
+function normalizeDomain(domain: string | undefined): string {
+  if (!domain) return '';
   return domain
     .toLowerCase()
     .replace(/^https?:\/\//, '')

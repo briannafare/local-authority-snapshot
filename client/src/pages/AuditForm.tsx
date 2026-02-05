@@ -125,41 +125,53 @@ export default function AuditForm() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#FF6B5B]/5 via-white to-[#2DD4BF]/5">
-      <div className="container py-12 max-w-4xl">
+    <div className="min-h-screen bg-white">
+      <div className="container py-16 max-w-4xl">
         {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold mb-2">Local Authority Snapshot</h1>
-          <p className="text-lg text-gray-600">
+        <div className="text-center mb-12">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gray-100 mb-6">
+            <span className="text-xs font-bold text-gray-600 uppercase tracking-wider">Free Revenue Audit</span>
+          </div>
+          <h1 className="text-5xl md:text-6xl font-bold mb-4 text-black tracking-tight">
+            Local Authority Snapshot
+          </h1>
+          <p className="text-xl text-gray-600">
             Discover hidden revenue opportunities in your local business
           </p>
         </div>
 
         {/* Progress Bar */}
-        <div className="mb-8">
-          <div className="flex justify-between mb-2">
-            <span className="text-sm font-medium">Step {currentStep} of 3</span>
-            <span className="text-sm text-gray-600">{Math.round(progress)}% Complete</span>
+        <div className="mb-10">
+          <div className="flex justify-between mb-3">
+            <span className="text-sm font-semibold text-black">Step {currentStep} of 3</span>
+            <span className="text-sm font-semibold text-[#FF6B35]">{Math.round(progress)}% Complete</span>
           </div>
-          <Progress value={progress} className="h-2" />
+          <div className="relative h-2 bg-gray-100 rounded-full overflow-hidden">
+            <div 
+              className="absolute top-0 left-0 h-full bg-[#FF6B35] rounded-full transition-all duration-500 ease-out"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
         </div>
 
         {/* Step Indicator */}
-        <div className="flex justify-between mb-8">
+        <div className="flex justify-between mb-12">
           {[1, 2, 3].map((step) => (
-            <div key={step} className="flex items-center">
+            <div key={step} className="flex flex-col items-center flex-1">
               <div
-                className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold ${
+                className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg transition-all duration-300 ${
                   step < currentStep
-                    ? "bg-[#2DD4BF] text-white"
+                    ? "bg-[#FF6B35] text-white"
                     : step === currentStep
-                    ? "bg-[#FF6B5B] text-white"
-                    : "bg-gray-200 text-gray-500"
+                    ? "bg-[#FF6B35] text-white"
+                    : "bg-gray-200 text-gray-400"
                 }`}
               >
                 {step < currentStep ? <CheckCircle2 className="w-6 h-6" /> : step}
               </div>
-              <span className="ml-2 text-sm font-medium hidden sm:inline">
+              <span className={`mt-3 text-sm font-semibold text-center transition-colors ${
+                step <= currentStep ? "text-black" : "text-gray-400"
+              }`}>
                 {step === 1 && "Business Basics"}
                 {step === 2 && "Current Marketing"}
                 {step === 3 && "Goals & Pain Points"}
@@ -169,14 +181,14 @@ export default function AuditForm() {
         </div>
 
         {/* Form Steps */}
-        <Card>
-          <CardHeader>
-            <CardTitle>
+        <Card className="shadow-sm border">
+          <CardHeader className="pb-8">
+            <CardTitle className="text-3xl font-bold text-black">
               {currentStep === 1 && "Tell us about your business"}
               {currentStep === 2 && "Current marketing & operations"}
               {currentStep === 3 && "Goals & challenges"}
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-lg text-gray-600 mt-2">
               {currentStep === 1 && "Basic information to personalize your audit"}
               {currentStep === 2 && "Help us understand your current setup"}
               {currentStep === 3 && "What you want to achieve and overcome"}

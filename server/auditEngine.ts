@@ -511,7 +511,7 @@ Return ONLY valid JSON in this exact format:
     const allCompetitors = new Set<string>();
     rankingResults.forEach(r => {
       r.topResults.slice(0, 5).forEach(result => {
-        if (!result.link.includes(input.websiteUrl.replace(/^https?:\/\//, '').replace('www.', ''))) {
+        if (result && result.link && result.title && !result.link.includes(input.websiteUrl.replace(/^https?:\/\//, '').replace('www.', ''))) {
           allCompetitors.add(result.title);
         }
       });

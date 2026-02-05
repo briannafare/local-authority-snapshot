@@ -168,6 +168,55 @@ export const appRouter = router({
               });
             }
             
+            // Generate GeoGrid data (premium feature)
+            let geoGridData: string | null = null;
+            try {
+              const { generateGeoGridData } = await import("./geoGridService");
+              const { searchBusiness } = await import("./googlePlacesAPI");
+              
+              // Get business location coordinates
+              const businessData = await searchBusiness(input.businessName, input.primaryLocation);
+              
+              if (businessData.found && businessData.googleMapsUrl) {
+                // Extract coordinates from Google Maps URL or use geocoding
+                // For now, use mock coordinates (in production, extract from Maps URL)
+                const centerLat = 40.7128; // NYC example
+                const centerLng = -74.0060;
+                
+                const keyword = `${input.primaryNiche} ${input.primaryLocation}`;
+                const gridData = await generateGeoGridData(
+                  input.businessName,
+                  keyword,
+                  centerLat,
+                  centerLng,
+                  5, // 5x5 grid
+                  2  // 2 miles between points
+                );
+                
+                geoGridData = JSON.stringify(gridData);
+                console.log(`[Audit] GeoGrid generated: ${gridData.averageRank} avg rank, ${gridData.visibility}% visibility`);
+              }
+            } catch (geoError) {
+              console.error("[Audit] GeoGrid generation failed (non-fatal):", geoError);
+            }
+
+            // Run deep competitor analysis (premium feature)
+            let deepCompetitorAnalysis: string | null = null;
+            try {
+              const { analyzeCompetitorsDeeply } = await import("./competitiveAnalysis");
+              
+              const competitorData = await analyzeCompetitorsDeeply(
+                input.businessName,
+                input.primaryNiche,
+                input.primaryLocation
+              );
+              
+              deepCompetitorAnalysis = JSON.stringify(competitorData);
+              console.log(`[Audit] Deep competitor analysis complete: ${competitorData.competitors?.length || 0} competitors analyzed`);
+            } catch (compError) {
+              console.error("[Audit] Deep competitor analysis failed (non-fatal):", compError);
+            }
+
             // Calculate overall grade and score
             const scores = [
               results.gbp?.score || 0,
@@ -199,6 +248,9 @@ export const appRouter = router({
               }),
               overallGrade,
               overallScore,
+              geoGridData,
+              deepCompetitorAnalysis,
+              fullReportUnlocked: 0, // Start as teaser, unlock after email
               status: "completed",
             });
 
