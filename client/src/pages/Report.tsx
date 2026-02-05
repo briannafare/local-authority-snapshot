@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useParams, useLocation } from "wouter";
+import { useParams, useLocation, useSearch } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,12 +8,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import { 
-  Loader2, 
-  Download, 
-  Mail, 
-  ArrowLeft, 
-  CheckCircle2, 
+import {
+  Loader2,
+  Download,
+  Mail,
+  ArrowLeft,
+  CheckCircle2,
   TrendingUp,
   AlertCircle,
   Target,
@@ -21,15 +21,22 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { GBPScoreChart, RankingsChart, WebsiteAnalysisChart, CompetitorChart, ROIProjectionChart } from "@/components/AuditCharts";
+import { TeaserReport } from "@/components/TeaserReport";
 import { GeoGridHeatmap } from "@/components/visualizations/GeoGridHeatmap";
 import { CompetitorRadarChart } from "@/components/visualizations/CompetitorRadarChart";
 
 export default function Report() {
   const params = useParams();
   const [, setLocation] = useLocation();
+  const searchString = useSearch();
   const auditId = parseInt(params.id || "0");
   const [emailDialogOpen, setEmailDialogOpen] = useState(false);
   const [emailInput, setEmailInput] = useState("");
+  const [showFullReport, setShowFullReport] = useState(false);
+
+  // Check URL params for full report access (?full=true from dashboard)
+  const searchParams = new URLSearchParams(searchString);
+  const fullAccessParam = searchParams.get("full") === "true";
 
   const { data: audit, isLoading, error } = trpc.audits.getById.useQuery({ id: auditId });
 
@@ -121,6 +128,114 @@ export default function Report() {
   const geoGridData = audit.geoGridData ? JSON.parse(audit.geoGridData) : null;
   const deepCompetitorAnalysis = audit.deepCompetitorAnalysis ? JSON.parse(audit.deepCompetitorAnalysis) : null;
 
+  // Determine if full report should be shown
+  const isFullReport = fullAccessParam || showFullReport || audit.fullReportUnlocked === 1;
+
+  // Calculate grade for teaser
+  const overallGrade = (audit.overallGrade as 'A' | 'B' | 'C' | 'D' | 'F') || 'C';
+  const overallScore = audit.overallScore || 50;
+
+  // Competitor count from competitive data
+  const competitorCount = competitive?.competitors?.length ||
+    competitive?.reasonsCompetitorsRank?.length || 5;
+
+  // Show Teaser Report for public visitors (no ?full=true)
+  if (!isFullReport) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-[#FF6B5B]/5 via-white to-[#2DD4BF]/5">
+        <header className="bg-white border-b sticky top-0 z-50">
+          <div className="container py-4">
+            <div className="flex justify-between items-center">
+              <div className="flex items-center gap-4">
+                <Button variant="ghost" onClick={() => setLocation("/")}>
+                  <ArrowLeft className="w-4 h-4 mr-2" /> Back
+                </Button>
+                <div>
+                  <h1 className="text-xl font-bold">Local Authority Snapshot</h1>
+                  <p className="text-sm text-gray-600">{audit.businessName}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        <div className="container py-12 max-w-4xl">
+          <TeaserReport
+            businessName={audit.businessName}
+            overallGrade={overallGrade}
+            overallScore={overallScore}
+            keyFindings={keyFindings}
+            competitorCount={competitorCount}
+            gbpScore={gbp?.score}
+            seoScore={seo?.score}
+            aeoScore={aeo?.score}
+            emailSent={!!audit.emailSent}
+            onRequestFullReport={() => {
+              if (audit.emailSent) {
+                // If they already gave email, unlock the full report
+                setShowFullReport(true);
+              } else {
+                // Open email dialog to gate the full report
+                setEmailDialogOpen(true);
+              }
+            }}
+          />
+        </div>
+
+        {/* Email Dialog for gating full report */}
+        <Dialog open={emailDialogOpen} onOpenChange={setEmailDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Get Your Full Report</DialogTitle>
+              <DialogDescription>
+                Enter your email to unlock the complete analysis including GeoGrid heatmap,
+                competitor breakdown, and customized action plan.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label htmlFor="teaser-email">Email Address</Label>
+                <Input
+                  id="teaser-email"
+                  type="email"
+                  placeholder="your@email.com"
+                  value={emailInput}
+                  onChange={(e) => setEmailInput(e.target.value)}
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setEmailDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button
+                className="bg-[#FF6B5B] hover:bg-[#E55A4A]"
+                onClick={() => {
+                  if (emailInput && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailInput)) {
+                    sendEmailMutation.mutate({ auditId: audit.id, email: emailInput });
+                    setShowFullReport(true);
+                    setEmailDialogOpen(false);
+                    toast.success("Full report unlocked! We'll also send a copy to your email.");
+                  } else {
+                    toast.error("Please enter a valid email address");
+                  }
+                }}
+                disabled={sendEmailMutation.isPending}
+              >
+                {sendEmailMutation.isPending ? (
+                  <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Sending...</>
+                ) : (
+                  <><Mail className="w-4 h-4 mr-2" /> Unlock Full Report</>
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </div>
+    );
+  }
+
+  // Full Report below
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#FF6B5B]/5 via-white to-[#2DD4BF]/5">
       {/* Header */}
