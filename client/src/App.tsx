@@ -1,7 +1,7 @@
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/NotFound";
-import { Route, Switch } from "wouter";
+import { Route, Switch, Router as WouterRouter } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
@@ -9,7 +9,7 @@ import AuditForm from "./pages/AuditForm";
 import Report from "./pages/Report";
 import Dashboard from "./pages/Dashboard";
 
-function Router() {
+function AppRoutes() {
   // make sure to consider if you need authentication for certain routes
   return (
     <Switch>
@@ -29,6 +29,11 @@ function Router() {
 //   to keep consistent foreground/background color across components
 // - If you want to make theme switchable, pass `switchable` ThemeProvider and use `useTheme` hook
 
+// Derive base path from Vite's base config (set via VITE_BASE_PATH env var)
+// Local dev: BASE_URL = "/" → no base prefix
+// Vercel:    BASE_URL = "/local-authority-snapshot/" → routes prefixed
+const basePath = import.meta.env.BASE_URL.replace(/\/$/, "") || undefined;
+
 function App() {
   return (
     <ErrorBoundary>
@@ -36,10 +41,12 @@ function App() {
         defaultTheme="light"
         // switchable
       >
-        <TooltipProvider>
-          <Toaster />
-          <Router />
-        </TooltipProvider>
+        <WouterRouter base={basePath}>
+          <TooltipProvider>
+            <Toaster />
+            <AppRoutes />
+          </TooltipProvider>
+        </WouterRouter>
       </ThemeProvider>
     </ErrorBoundary>
   );
