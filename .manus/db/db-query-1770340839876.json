@@ -1,0 +1,55 @@
+{
+  "query": "SELECT * FROM auditVisuals LIMIT 5;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user gvHM7L26eFEKLxd.root --database hmgSMMSSNJCN2iZZwVjazU --execute SELECT * FROM auditVisuals LIMIT 5;",
+  "rows": [
+    {
+      "id": "1",
+      "auditId": "60009",
+      "visualType": "gbp_score_gauge",
+      "imageUrl": "https://d2xsxph8kpxj0f.cloudfront.net/100325387/hmgSMMSSNJCN2iZZwVjazU/audit-visuals/8lX1SlpaCYl1WpgXDIdgk-gbp-score-60009.png",
+      "s3Key": "audit-visuals/8lX1SlpaCYl1WpgXDIdgk-gbp-score-60009.png",
+      "description": "Google Business Profile optimization score gauge",
+      "createdAt": "2026-02-02 05:57:40"
+    },
+    {
+      "id": "2",
+      "auditId": "60009",
+      "visualType": "seo_score_gauge",
+      "imageUrl": "https://d2xsxph8kpxj0f.cloudfront.net/100325387/hmgSMMSSNJCN2iZZwVjazU/audit-visuals/HHqdVcx7hVoXQ0a3ZzAIK-seo-score-60009.png",
+      "s3Key": "audit-visuals/HHqdVcx7hVoXQ0a3ZzAIK-seo-score-60009.png",
+      "description": "Website local SEO score gauge",
+      "createdAt": "2026-02-02 05:57:40"
+    },
+    {
+      "id": "3",
+      "auditId": "60009",
+      "visualType": "aeo_score_gauge",
+      "imageUrl": "https://d2xsxph8kpxj0f.cloudfront.net/100325387/hmgSMMSSNJCN2iZZwVjazU/audit-visuals/1mqBKp_2jKCtak2Br98gI-aeo-score-60009.png",
+      "s3Key": "audit-visuals/1mqBKp_2jKCtak2Br98gI-aeo-score-60009.png",
+      "description": "AI/AEO discoverability score gauge",
+      "createdAt": "2026-02-02 05:57:40"
+    },
+    {
+      "id": "4",
+      "auditId": "60009",
+      "visualType": "ranking_comparison",
+      "imageUrl": "https://d2xsxph8kpxj0f.cloudfront.net/100325387/hmgSMMSSNJCN2iZZwVjazU/audit-visuals/6WF8UFQmi8z5MhDE85Epb-ranking-comparison-60009.png",
+      "s3Key": "audit-visuals/6WF8UFQmi8z5MhDE85Epb-ranking-comparison-60009.png",
+      "description": "Search ranking comparison vs top competitor",
+      "createdAt": "2026-02-02 05:57:40"
+    },
+    {
+      "id": "5",
+      "auditId": "60009",
+      "visualType": "conversion_funnel",
+      "imageUrl": "https://d2xsxph8kpxj0f.cloudfront.net/100325387/hmgSMMSSNJCN2iZZwVjazU/audit-visuals/42ISrjG6odKd4GRzYc0b8-funnel-60009.png",
+      "s3Key": "audit-visuals/42ISrjG6odKd4GRzYc0b8-funnel-60009.png",
+      "description": "Revenue recapture conversion funnel",
+      "createdAt": "2026-02-02 05:57:40"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tauditId\tvisualType\timageUrl\ts3Key\tdescription\tcreatedAt\n1\t60009\tgbp_score_gauge\thttps://d2xsxph8kpxj0f.cloudfront.net/100325387/hmgSMMSSNJCN2iZZwVjazU/audit-visuals/8lX1SlpaCYl1WpgXDIdgk-gbp-score-60009.png\taudit-visuals/8lX1SlpaCYl1WpgXDIdgk-gbp-score-60009.png\tGoogle Business Profile optimization score gauge\t2026-02-02 05:57:40\n2\t60009\tseo_score_gauge\thttps://d2xsxph8kpxj0f.cloudfront.net/100325387/hmgSMMSSNJCN2iZZwVjazU/audit-visuals/HHqdVcx7hVoXQ0a3ZzAIK-seo-score-60009.png\taudit-visuals/HHqdVcx7hVoXQ0a3ZzAIK-seo-score-60009.png\tWebsite local SEO score gauge\t2026-02-02 05:57:40\n3\t60009\taeo_score_gauge\thttps://d2xsxph8kpxj0f.cloudfront.net/100325387/hmgSMMSSNJCN2iZZwVjazU/audit-visuals/1mqBKp_2jKCtak2Br98gI-aeo-score-60009.png\taudit-visuals/1mqBKp_2jKCtak2Br98gI-aeo-score-60009.png\tAI/AEO discoverability score gauge\t2026-02-02 05:57:40\n4\t60009\tranking_comparison\thttps://d2xsxph8kpxj0f.cloudfront.net/100325387/hmgSMMSSNJCN2iZZwVjazU/audit-visuals/6WF8UFQmi8z5MhDE85Epb-ranking-comparison-60009.png\taudit-visuals/6WF8UFQmi8z5MhDE85Epb-ranking-comparison-60009.png\tSearch ranking comparison vs top competitor\t2026-02-02 05:57:40\n5\t60009\tconversion_funnel\thttps://d2xsxph8kpxj0f.cloudfront.net/100325387/hmgSMMSSNJCN2iZZwVjazU/audit-visuals/42ISrjG6odKd4GRzYc0b8-funnel-60009.png\taudit-visuals/42ISrjG6odKd4GRzYc0b8-funnel-60009.png\tRevenue recapture conversion funnel\t2026-02-02 05:57:40\n",
+  "stderr": "",
+  "execution_time_ms": 60
+}

@@ -60,10 +60,12 @@ export async function searchRankings(
 
     // Find target business position
     const normalizedTarget = normalizeDomain(targetDomain);
-    const targetResult = organicResults.find(r => 
-      normalizeDomain(r.domain) === normalizedTarget || 
-      normalizeDomain(r.link).includes(normalizedTarget)
-    );
+    const targetResult = organicResults.find(r => {
+      const normalizedDomain = normalizeDomain(r.domain);
+      const normalizedLink = normalizeDomain(r.link);
+      return (normalizedDomain && normalizedTarget && normalizedDomain === normalizedTarget) || 
+             (normalizedLink && normalizedTarget && normalizedLink.includes(normalizedTarget));
+    });
 
     // Extract local pack results if available
     const localPackResults: SearchResult[] = [];

@@ -172,57 +172,66 @@ export async function generateAuditVisuals(auditId: number, auditResults: any) {
     }
 
     // Ranking Comparison Chart (if ranking data available)
-    if (auditResults.seo?.rankingData?.queries && auditResults.seo.rankingData.queries.length > 0) {
-      const queries = auditResults.seo.rankingData.queries.slice(0, 5);
-      const yourPositions = queries.map((q: any) => q.position || 100);
-      const competitorPositions = queries.map((q: any) => 
-        q.competitors[0]?.position || 100
-      );
-      
-      const { url, s3Key } = await generateVisual(
-        "ranking_comparison",
-        {
-          queries: queries.map((q: any) => q.query),
-          your_positions: yourPositions,
-          competitor_positions: competitorPositions,
-        },
-        `ranking-comparison-${auditId}.png`
-      );
-      visuals.push({
-        visualType: "ranking_comparison",
-        url,
-        s3Key,
-        description: "Search ranking comparison vs top competitor",
-      });
+    if (auditResults.seo?.rankingData?.queries && Array.isArray(auditResults.seo.rankingData.queries) && auditResults.seo.rankingData.queries.length > 0) {
+      try {
+        const queries = auditResults.seo.rankingData.queries.slice(0, 5);
+        const yourPositions = queries.map((q: any) => q?.position || 100);
+        const competitorPositions = queries.map((q: any) => 
+          q?.competitors?.[0]?.position || 100
+        );
+        
+        const { url, s3Key } = await generateVisual(
+          "ranking_comparison",
+          {
+            queries: queries.map((q: any) => q?.query || 'Unknown'),
+            your_positions: yourPositions,
+            competitor_positions: competitorPositions,
+          },
+          `ranking-comparison-${auditId}.png`
+        );
+        visuals.push({
+          visualType: "ranking_comparison",
+          url,
+          s3Key,
+          description: "Search ranking comparison vs top competitor",
+        });
+      } catch (err) {
+        console.error('[Visual Generator] Failed to generate ranking comparison:', err);
+      }
     }
 
     // Geographic Heat Map (if ranking data available)
-    if (auditResults.seo?.rankingData?.averagePosition !== null && auditResults.seo?.rankingData?.averagePosition !== undefined) {
-      // Generate a sample heat map grid based on average position
-      const avgPos = auditResults.seo.rankingData.averagePosition || 50;
-      const grid = [
-        [avgPos + 2, avgPos, avgPos + 1, null, null],
-        [avgPos + 1, avgPos - 1, avgPos, avgPos + 3, null],
-        [avgPos, avgPos - 2, avgPos, avgPos + 2, avgPos + 5],
-        [null, avgPos + 1, avgPos - 1, avgPos + 1, avgPos + 4],
-        [null, null, avgPos + 2, avgPos + 3, avgPos + 6],
-      ];
-      
-      const { url, s3Key } = await generateVisual(
-        "heat_map",
-        {
-          title: "Local Ranking Coverage Map",
-          grid,
-          center_label: "Primary Location",
-        },
-        `heat-map-${auditId}.png`
-      );
-      visuals.push({
-        visualType: "ranking_heat_map",
-        url,
-        s3Key,
-        description: "Geographic ranking coverage heat map",
-      });
+    const avgPosition = auditResults.seo?.rankingData?.averagePosition;
+    if (avgPosition !== null && avgPosition !== undefined && typeof avgPosition === 'number') {
+      try {
+        // Generate a sample heat map grid based on average position
+        const avgPos = avgPosition || 50;
+        const grid = [
+          [avgPos + 2, avgPos, avgPos + 1, null, null],
+          [avgPos + 1, avgPos - 1, avgPos, avgPos + 3, null],
+          [avgPos, avgPos - 2, avgPos, avgPos + 2, avgPos + 5],
+          [null, avgPos + 1, avgPos - 1, avgPos + 1, avgPos + 4],
+          [null, null, avgPos + 2, avgPos + 3, avgPos + 6],
+        ];
+        
+        const { url, s3Key } = await generateVisual(
+          "heat_map",
+          {
+            title: "Local Ranking Coverage Map",
+            grid,
+            center_label: "Primary Location",
+          },
+          `heat-map-${auditId}.png`
+        );
+        visuals.push({
+          visualType: "ranking_heat_map",
+          url,
+          s3Key,
+          description: "Geographic ranking coverage heat map",
+        });
+      } catch (err) {
+        console.error('[Visual Generator] Failed to generate heat map:', err);
+      }
     }
 
     // Conversion Funnel

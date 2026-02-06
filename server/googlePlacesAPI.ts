@@ -182,7 +182,7 @@ export async function searchBusiness(businessName: string, location: string): Pr
 
     // Step 2: Get detailed information
     const detailsResponse = await axios.get(
-      `https://places.googleapis.com/v1/${placeId}`,
+      `https://places.googleapis.com/v1/places/${placeId}`,
       {
         headers: {
           'Content-Type': 'application/json',
@@ -268,7 +268,7 @@ export async function searchBusinessExtended(businessName: string, location: str
     ].join(',');
 
     const detailsResponse = await axios.get(
-      `https://places.googleapis.com/v1/${placeId}`,
+      `https://places.googleapis.com/v1/places/${placeId}`,
       {
         headers: {
           'Content-Type': 'application/json',

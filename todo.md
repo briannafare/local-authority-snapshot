@@ -348,6 +348,10 @@
 - [ ] Verify email delivery system works correctly
 - [ ] Ensure all charts render properly in completed reports
 
+## BUG: Published Site Navigation Issue
+- [ ] "Get Your Free Audit" button not working on published site - clicking does nothing
+- [ ] Debug navigation/routing issue on production
+
 ## Phase 17: Email Delivery System
 
 - [x] Add email input field to audit form (optional)
@@ -536,3 +540,18 @@
 - [x] Remove excessive animations and keep subtle ones only
 - [x] Update cards with minimal styling (shadow-sm, clean borders)
 - [ ] Test all pages to ensure consistent branding
+
+
+## Bug Fixes - Feb 2026
+- [ ] Fix GBP URL parser to extract rating/review data properly (use Google Places API as fallback)
+- [ ] Improve competitive analysis to use Google Places API instead of web scraping
+
+
+## Bug Fixes - Feb 5, 2026
+- [x] Fix Google Places API endpoint URL (changed from /v1/{placeId} to /v1/places/{placeId})
+- [x] Add GBP data fallback to Google Places API when URL parsing fails
+- [x] Update competitive analysis to use Google Places API as primary source
+- [x] Fix null/undefined error handling in serpstackAPI.ts
+- [x] Fix null/undefined error handling in auditEngine.ts
+- [x] Add try-catch blocks to visualGenerator.ts for ranking data
+- [x] Remove broken Vercel configuration files (api/ folder and vercel.json)

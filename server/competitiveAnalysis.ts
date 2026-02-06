@@ -56,7 +56,7 @@ export interface DeepCompetitorAnalysis {
 }
 
 /**
- * Search Google for competitors in the local area
+ * Search for competitors using Google Places API (primary) with web scraping fallback
  */
 export async function searchCompetitors(
   service: string,
@@ -72,8 +72,37 @@ export async function searchCompetitors(
   };
 
   try {
-    const searchQuery = encodeURIComponent(`${service} in ${location}`);
-    const searchUrl = `https://www.google.com/search?q=${searchQuery}`;
+    // PRIMARY: Use Google Places API for reliable competitor data
+    console.log('[Competitive Analysis] Using Google Places API for competitor search');
+    const placesCompetitors = await searchCompetitorsPlaces(service, location, 10);
+    
+    if (placesCompetitors && placesCompetitors.length > 0) {
+      let position = 1;
+      for (const comp of placesCompetitors) {
+        // Check if this is the user's business
+        if (comp.name && comp.name.toLowerCase().includes(yourBusinessName.toLowerCase())) {
+          result.yourPosition = position;
+        } else {
+          result.competitors.push({
+            name: comp.name || 'Unknown',
+            website: null, // Not available from Places text search
+            rating: comp.rating || null,
+            reviewCount: comp.reviewCount || null,
+            snippet: comp.address || null,
+          });
+        }
+        position++;
+      }
+      
+      result.totalResults = result.competitors.length;
+      console.log('[Competitive Analysis] Found ' + result.competitors.length + ' competitors via Google Places API');
+      return result;
+    }
+    
+    // FALLBACK: Web scraping if Places API returns no results
+    console.log('[Competitive Analysis] Places API returned no results, falling back to web scraping');
+    const searchQuery = encodeURIComponent(service + ' in ' + location);
+    const searchUrl = 'https://www.google.com/search?q=' + searchQuery;
 
     const response = await axios.get(searchUrl, {
       timeout: 10000,

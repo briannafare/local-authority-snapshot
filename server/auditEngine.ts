@@ -2,6 +2,7 @@ import { invokeLLM } from "./_core/llm";
 import { searchGBP, analyzeGBPData } from "./gbpScraper";
 import { searchBusiness } from "./googlePlacesAPI";
 import { fetchGBPFromUrl, analyzeGBPFromUrl } from "./gbpUrlParser";
+import { getGBPDataWithFallback } from "./gbpDataHelper";
 import { crawlWebsite, analyzeWebsiteData } from "./websiteCrawler";
 import { searchCompetitors, analyzeCompetitiveData, generateCompetitiveRecommendations } from "./competitiveAnalysis";
 import { trackRankings, analyzeRankings } from "./rankingTracker";
@@ -142,127 +143,17 @@ export interface RecommendedPlan {
  * Analyze Google Business Profile with REAL scraped data
  */
 export async function analyzeGBP(input: AuditInput): Promise<GBPAuditResult> {
-  // Step 1: Get real GBP data (from URL if provided, otherwise search)
-  let gbpAnalysis: any;
-  let dataContext: string;
-
-  if (input.gbpUrl) {
-    // Use provided GBP URL
-    const gbpUrlData = await fetchGBPFromUrl(input.gbpUrl);
-    gbpAnalysis = analyzeGBPFromUrl(gbpUrlData);
-    
-    dataContext = gbpUrlData.error
-      ? `⚠️ REAL DATA: Unable to fetch from provided GBP URL. Error: ${gbpUrlData.error}`
-      : `✅ REAL DATA FROM YOUR GBP URL:
-- Business Name: ${gbpUrlData.businessName || "Not found"}
-- Rating: ${gbpUrlData.rating !== null ? `${gbpUrlData.rating} stars` : "No rating"}
-- Review Count: ${gbpUrlData.reviewCount !== null ? `${gbpUrlData.reviewCount} reviews` : "No reviews"}
-- Address: ${gbpUrlData.address || "Not found"}
-- Phone: ${gbpUrlData.phone || "Not found"}
-- Website: ${gbpUrlData.website || "Not found"}
-- Categories: ${gbpUrlData.categories.length > 0 ? gbpUrlData.categories.join(", ") : "None"}
-- Photos: ${gbpUrlData.photoCount !== null ? `${gbpUrlData.photoCount} photos` : "Not found"}
-
-ANALYSIS BASED ON REAL DATA:
-- Score: ${gbpAnalysis.score}/100
-- Issues: ${gbpAnalysis.issues.join(", ")}
-- Strengths: ${gbpAnalysis.strengths.join(", ")}`;
-  } else {
-    // Use Google Places API for real data
-    const placesData = await searchBusiness(input.businessName, input.primaryLocation);
-    
-    if (!placesData.found) {
-      dataContext = `⚠️ REAL DATA: Google Business Profile not found via Google Places API. This business may not have claimed their GBP or doesn't exist in Google's database.`;
-      gbpAnalysis = { score: 0, issues: ['GBP not found or not claimed'], strengths: [] };
-    } else {
-      // Calculate score based on real data
-      let score = 0;
-      const issues: string[] = [];
-      const strengths: string[] = [];
-      
-      // Rating and reviews (40 points)
-      if (placesData.rating && placesData.rating >= 4.5) {
-        score += 20;
-        strengths.push(`Excellent rating: ${placesData.rating}/5`);
-      } else if (placesData.rating && placesData.rating >= 4.0) {
-        score += 15;
-        strengths.push(`Good rating: ${placesData.rating}/5`);
-      } else if (placesData.rating) {
-        score += 10;
-        issues.push(`Low rating: ${placesData.rating}/5 - needs improvement`);
-      } else {
-        issues.push('No rating found');
-      }
-      
-      if (placesData.totalReviews && placesData.totalReviews >= 50) {
-        score += 20;
-        strengths.push(`Strong review count: ${placesData.totalReviews} reviews`);
-      } else if (placesData.totalReviews && placesData.totalReviews >= 10) {
-        score += 15;
-        strengths.push(`${placesData.totalReviews} reviews`);
-      } else if (placesData.totalReviews) {
-        score += 5;
-        issues.push(`Only ${placesData.totalReviews} reviews - need more`);
-      } else {
-        issues.push('No reviews found');
-      }
-      
-      // Photos (20 points)
-      if (placesData.photoCount && placesData.photoCount >= 20) {
-        score += 20;
-        strengths.push(`${placesData.photoCount} photos uploaded`);
-      } else if (placesData.photoCount && placesData.photoCount >= 5) {
-        score += 10;
-        issues.push(`Only ${placesData.photoCount} photos - add more`);
-      } else {
-        issues.push('Very few or no photos');
-      }
-      
-      // Basic info (40 points)
-      if (placesData.address) {
-        score += 10;
-        strengths.push('Address verified');
-      } else {
-        issues.push('Address missing');
-      }
-      
-      if (placesData.websiteUrl) {
-        score += 10;
-        strengths.push('Website linked');
-      } else {
-        issues.push('No website URL');
-      }
-      
-      if (placesData.hours && placesData.hours.length > 0) {
-        score += 10;
-        strengths.push('Business hours set');
-      } else {
-        issues.push('Business hours not set');
-      }
-      
-      if (placesData.isOpen !== undefined) {
-        score += 10;
-      }
-      
-      gbpAnalysis = { score, issues, strengths };
-      
-      dataContext = `✅ REAL DATA FROM GOOGLE PLACES API:
-- Business Name: ${placesData.name}
-- Rating: ${placesData.rating}/5
-- Review Count: ${placesData.totalReviews} reviews
-- Address: ${placesData.address}
-- Website: ${placesData.websiteUrl || 'Not linked'}
-- Photos: ${placesData.photoCount} photos
-- Hours: ${placesData.hours ? 'Set' : 'Not set'}
-- Currently Open: ${placesData.isOpen ? 'Yes' : 'No'}
-- Google Maps URL: ${placesData.googleMapsUrl}
-
-ANALYSIS BASED ON REAL DATA:
-- Score: ${gbpAnalysis.score}/100
-- Issues: ${gbpAnalysis.issues.join(", ")}
-- Strengths: ${gbpAnalysis.strengths.join(", ")}`;
-    }
-  }
+  // Step 1: Get real GBP data with automatic fallback to Google Places API
+  const gbpResult = await getGBPDataWithFallback(
+    input.gbpUrl,
+    input.businessName,
+    input.primaryLocation
+  );
+  
+  const gbpAnalysis = gbpResult.analysis;
+  const dataContext = gbpResult.dataContext;
+  
+  console.log('[GBP Audit] Data source: ' + gbpResult.dataSource + ', Score: ' + gbpAnalysis.score);
 
   // Step 2: Use LLM to generate optimized content based on real data
   const prompt = `You are a local SEO expert. You have REAL scraped data from Google for ${input.businessName}, a ${input.primaryNiche} business in ${input.primaryLocation}.

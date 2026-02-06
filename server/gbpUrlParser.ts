@@ -1,5 +1,6 @@
 import axios from "axios";
 import * as cheerio from "cheerio";
+import { searchBusiness } from "./googlePlacesAPI";
 
 export interface GBPUrlData {
   placeId: string | null;
