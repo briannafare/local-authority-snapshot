@@ -572,3 +572,48 @@
 - [x] Add PDF download button to report page (Download PDF button in header and footer)
 - [x] Update TeaserReport with clearer unlock CTA
 - [x] Add database fields for lead info (leadName, leadEmail, leadPhone, leadCapturedAt)
+
+
+## PDF Report Redesign - Feb 5, 2026
+- [ ] Fix data collection - ensure real GBP rating/reviews are captured (showing "No rating data found" when business has 5.0/156 reviews)
+- [ ] Redesign PDF cover page - remove metadata text at top, add professional gradient design
+- [ ] Add executive summary dashboard with key metrics at a glance
+- [ ] Create competitor comparison bar charts with real competitor names and data
+- [ ] Add geographic ranking heat map visualization to PDF
+- [ ] Implement color-coded severity indicators (red/yellow/green) throughout
+- [ ] Add branded headers/footers with page numbers
+- [ ] Create priority matrix for recommendations (effort vs impact)
+- [ ] Add revenue impact calculations with real numbers
+- [ ] Include call-to-action page with contact info at end
+- [ ] Fix empty/wasted pages in PDF layout (page 2 is mostly empty)
+- [ ] Reduce report length - currently 25 pages, should be 8-12 pages max
+
+
+## PDF Report Redesign - Feb 5, 2026 (COMPLETED)
+
+### Data Flow Fixes
+- [x] Fix Google Places API endpoint URL (was returning 404)
+- [x] Add GBP data fallback to Google Places API when URL parsing fails
+- [x] Update competitive analysis to use Google Places API as primary source
+- [x] Fix routers.ts to properly pass keyFindings and priorityActions to PDF generator
+- [x] Generate priorityActions from audit improvements data
+
+### PDF Layout Redesign
+- [x] Redesign cover page with clean business info display
+- [x] Add Executive Dashboard with score summary table
+- [x] Add color-coded status indicators (green/yellow/red)
+- [x] Add Key Findings section with numbered list
+- [x] Add Priority Actions table with color-coded priority levels
+- [x] Add competitor table with real names, ratings, reviews, and threat levels
+- [x] Add "Why Competitors Rank Higher" analysis
+- [x] Add "Trust & Authority Gaps" section
+- [x] Add "Your Competitive Advantages" section
+- [x] Fix Revenue Recovery display ($11,250)
+- [x] Ensure all gauge charts render correctly (GBP, SEO, AEO)
+
+### Lead Capture System
+- [x] Add lead capture form with name, email, phone fields
+- [x] Implement email delivery of PDF report
+- [x] Add sales bypass mode (?sales=true or logged in users)
+- [x] Add PDF download button to report page
+- [x] Update TeaserReport with clearer unlock CTA

@@ -23,6 +23,12 @@ export interface PDFGenerationInput {
   visualUrls: string[];
   overallGrade?: string;
   overallScore?: number;
+  competitors?: Array<{
+    name: string;
+    rating: number | null;
+    reviewCount: number | null;
+    address?: string;
+  }>;
 }
 
 /**
@@ -45,13 +51,11 @@ export async function generatePDF(input: PDFGenerationInput): Promise<string> {
     const localVisualUrls: string[] = [];
     for (let i = 0; i < input.visualUrls.length; i++) {
       const url = input.visualUrls[i];
-      // Extract filename from URL to preserve visual type information
       const urlParts = url.split('/');
       const originalFilename = urlParts[urlParts.length - 1];
       const localPath = join(tempDir, originalFilename);
       
       try {
-        // Download image
         console.log(`[PDF Generator] Downloading image ${i}: ${url}`);
         const response = await fetch(url);
         if (response.ok) {
@@ -62,14 +66,14 @@ export async function generatePDF(input: PDFGenerationInput): Promise<string> {
           tempImagePaths.push(localPath);
         } else {
           console.error(`[PDF Generator] Failed to download image (${response.status}): ${url}`);
-          localVisualUrls.push(url); // Fallback to remote URL
+          localVisualUrls.push(url);
         }
       } catch (error) {
         console.error(`[PDF Generator] Error downloading image ${url}:`, error);
-        localVisualUrls.push(url); // Fallback to remote URL
+        localVisualUrls.push(url);
       }
     }
-    console.log(`[PDF Generator] Downloaded ${localVisualUrls.length} images, ${localVisualUrls.filter(u => u.startsWith('/')).length} local`);
+    console.log(`[PDF Generator] Downloaded ${localVisualUrls.length} images`);
 
     // Create markdown content with local image paths
     const markdown = generateReportMarkdown({ ...input, visualUrls: localVisualUrls });
@@ -107,8 +111,24 @@ export async function generatePDF(input: PDFGenerationInput): Promise<string> {
   }
 }
 
+// Helper functions for formatting
+function getScoreEmoji(score: number): string {
+  if (score >= 80) return '🟢';
+  if (score >= 60) return '🟡';
+  if (score >= 40) return '🟠';
+  return '🔴';
+}
+
+function getScoreLabel(score: number): string {
+  if (score >= 80) return 'Excellent';
+  if (score >= 60) return 'Good';
+  if (score >= 40) return 'Needs Work';
+  if (score >= 20) return 'Poor';
+  return 'Critical';
+}
+
 /**
- * Generate markdown content for the PDF report
+ * Generate markdown content for the PDF report - Pure Markdown Version
  */
 function generateReportMarkdown(input: PDFGenerationInput): string {
   const {
@@ -125,303 +145,251 @@ function generateReportMarkdown(input: PDFGenerationInput): string {
     revenueRecapture,
     recommendedPlan,
     visualUrls,
+    competitors,
   } = input;
 
-  const grade = (input as any).overallGrade || 'C';
-  const score = (input as any).overallScore || 50;
+  const grade = input.overallGrade || 'C';
+  const score = input.overallScore || 50;
+  const today = new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
 
-  return `---
-title: Local Authority Snapshot
-subtitle: Revenue Recapture Audit for ${businessName}
-author: eighty5labs
-date: ${new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}
----
+  // Find specific chart images
+  const gbpScoreChart = visualUrls.find(url => url.includes('gbp') && url.includes('score'));
+  const seoScoreChart = visualUrls.find(url => url.includes('seo') && url.includes('score'));
+  const aeoScoreChart = visualUrls.find(url => url.includes('aeo') && url.includes('score'));
+  const rankingChart = visualUrls.find(url => url.includes('ranking'));
+  const heatMapChart = visualUrls.find(url => url.includes('heat'));
+  const competitorChart = visualUrls.find(url => url.includes('competitor'));
 
-<div style="text-align: center; margin-top: 80px; padding: 40px;">
-  <div style="width: 120px; height: 120px; margin: 0 auto 30px; background: linear-gradient(135deg, #FF6B5B, #2DD4BF); border-radius: 24px; display: flex; align-items: center; justify-content: center;">
-    <span style="font-size: 48px; color: white; font-weight: bold;">85</span>
-  </div>
-  <h1 style="color: #FF6B5B; font-size: 44px; margin-bottom: 8px; font-weight: 800;">Local Authority Snapshot</h1>
-  <h2 style="color: #2DD4BF; font-size: 24px; margin-bottom: 50px; font-weight: 400;">Premium Local SEO + AEO Revenue Audit</h2>
-  <div style="border-top: 3px solid #FF6B5B; width: 80px; margin: 0 auto 40px;"></div>
-  <h3 style="font-size: 32px; margin-bottom: 12px; font-weight: 700;">${businessName}</h3>
-  <p style="font-size: 18px; color: #666;">${primaryLocation} | ${primaryNiche}</p>
-  <div style="margin-top: 60px; padding: 20px; border: 2px solid #FF6B5B; border-radius: 12px; display: inline-block;">
-    <span style="font-size: 48px; font-weight: 800; color: #FF6B5B;">${grade}</span>
-    <br/>
-    <span style="font-size: 14px; color: #666;">Overall Grade (${score}/100)</span>
-  </div>
-  <p style="font-size: 14px; color: #999; margin-top: 50px;">Prepared by eighty5labs</p>
-  <p style="font-size: 12px; color: #999;">${new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}</p>
-</div>
-
-<div style="page-break-after: always;"></div>
+  return `# LOCAL AUTHORITY SNAPSHOT
+## Revenue Recapture Audit Report
 
 ---
 
-## Executive Summary
+**Prepared for:** ${businessName}
 
-**Business:** ${businessName}  
-**Industry:** ${primaryNiche}  
+**Industry:** ${primaryNiche}
+
 **Location:** ${primaryLocation}
 
-### Visibility Scores
+**Report Date:** ${today}
 
-${visualUrls.filter(url => url.includes('-score-')).map(url => `
-![Score Gauge](${url})
-`).join('') || ''}
-
-${visualUrls.filter(url => url.includes('scores-comparison')).map(url => `
-![Scores Comparison](${url})
-`).join('') || ''}
-
-### Key Findings
-
-${executiveSummary.keyFindings?.map((f: string) => `- ${f}`).join("\n") || ""}
-
-### Overall Assessment
-
-${executiveSummary.overallAssessment || ""}
-
-### Priority Actions
-
-${executiveSummary.priorityActions?.map((a: string, i: number) => `${i + 1}. ${a}`).join("\n") || ""}
+**Prepared by:** eighty5labs
 
 ---
 
-## 1. Google Business Profile Audit
+# Overall Grade: ${grade} (${score}/100)
 
-**Optimization Score:** ${gbpAudit.score}/100
+${getScoreEmoji(score)} ${getScoreLabel(score)}
+
+---
+
+# Executive Dashboard
+
+## Score Summary
+
+| Category | Score | Status |
+|----------|-------|--------|
+| **GBP Optimization** | ${gbpAudit?.score || 0}/100 | ${getScoreEmoji(gbpAudit?.score || 0)} ${getScoreLabel(gbpAudit?.score || 0)} |
+| **Website SEO** | ${seoAudit?.score || 0}/100 | ${getScoreEmoji(seoAudit?.score || 0)} ${getScoreLabel(seoAudit?.score || 0)} |
+| **AI Discoverability (AEO)** | ${aeoAnalysis?.score || 0}/100 | ${getScoreEmoji(aeoAnalysis?.score || 0)} ${getScoreLabel(aeoAnalysis?.score || 0)} |
+
+${revenueRecapture?.estimatedMonthlyRecovery ? `
+## 💰 Estimated Monthly Revenue Recovery: $${revenueRecapture.estimatedMonthlyRecovery.toLocaleString()}
+` : ''}
+
+## Key Findings
+
+${executiveSummary?.keyFindings?.slice(0, 5).map((f: string, i: number) => `${i + 1}. ${f}`).join('\n\n') || '*Analysis in progress*'}
+
+## Priority Actions
+
+| Priority | Action | Impact |
+|----------|--------|--------|
+${executiveSummary?.priorityActions?.slice(0, 5).map((a: string, i: number) => `| ${i < 2 ? '🔴 HIGH' : i < 4 ? '🟡 MEDIUM' : '🟢 LOW'} | ${a} | ${i < 2 ? 'Critical' : i < 4 ? 'Important' : 'Recommended'} |`).join('\n') || '| - | *Analysis in progress* | - |'}
+
+---
+
+# Google Business Profile Analysis
+
+## GBP Score: ${gbpAudit?.score || 0}/100 ${getScoreEmoji(gbpAudit?.score || 0)}
+
+${gbpScoreChart ? `![GBP Score](${gbpScoreChart})` : ''}
 
 ### Current Issues
 
-${gbpAudit.issues?.map((issue: string) => `- ${issue}`).join("\n") || ""}
+${gbpAudit?.issues?.slice(0, 6).map((issue: string) => `- ❌ ${issue}`).join('\n') || '- *No issues identified*'}
 
 ### Recommended Improvements
 
-${gbpAudit.improvements?.map((imp: string) => `- ${imp}`).join("\n") || ""}
+${gbpAudit?.improvements?.slice(0, 6).map((imp: string) => `- ✅ ${imp}`).join('\n') || '- *No improvements needed*'}
 
 ### Optimized Business Description
 
-${gbpAudit.optimizedDescription || ""}
+> ${gbpAudit?.optimizedDescription || '*No optimized description available*'}
 
-### Recommended Services
+### Recommended Services to Add
 
-${gbpAudit.optimizedServices?.map((service: string) => `- ${service}`).join("\n") || ""}
-
-### Example Google Post
-
-> ${gbpAudit.examplePost || ""}
+${gbpAudit?.optimizedServices?.slice(0, 6).map((service: string) => `- ${service}`).join('\n') || '- *No services recommended*'}
 
 ---
 
-## 2. Website Local SEO Audit
+# Website SEO Analysis
 
-**SEO Score:** ${seoAudit.score}/100
+## SEO Score: ${seoAudit?.score || 0}/100 ${getScoreEmoji(seoAudit?.score || 0)}
 
-### Current Weaknesses
+${seoScoreChart ? `![SEO Score](${seoScoreChart})` : ''}
 
-${seoAudit.weaknesses?.map((w: string) => `- ${w}`).join("\n") || ""}
+### Search Ranking Performance
+
+${seoAudit?.rankingData ? `
+| Metric | Value |
+|--------|-------|
+| **Average Position** | ${seoAudit.rankingData.averagePosition ? `#${seoAudit.rankingData.averagePosition.toFixed(1)}` : 'Not ranking'} |
+| **Local Pack Presence** | ${seoAudit.rankingData.inLocalPack ? '✅ Yes' : '❌ No'} |
+| **Top Competitors** | ${seoAudit.rankingData.topCompetitors?.length || 0} identified |
+` : '*Ranking data not available*'}
+
+${rankingChart ? `![Ranking Analysis](${rankingChart})` : ''}
+
+### Query Performance
+
+| Search Query | Your Position | Status |
+|--------------|---------------|--------|
+${seoAudit?.rankingData?.queries?.slice(0, 5).map((q: any) => `| "${q.query}" | ${q.position ? `#${q.position}` : 'Not ranking'} | ${q.position && q.position <= 3 ? '🟢 Strong' : q.position && q.position <= 10 ? '🟡 Visible' : '🔴 Needs Work'} |`).join('\n') || '| *No queries tracked* | - | - |'}
+
+### SEO Weaknesses
+
+${seoAudit?.weaknesses?.slice(0, 5).map((w: string) => `- ${w}`).join('\n') || '- *No weaknesses identified*'}
 
 ### Recommended Improvements
 
-${seoAudit.improvements?.map((imp: string) => `- ${imp}`).join("\n") || ""}
+${seoAudit?.improvements?.slice(0, 5).map((imp: string) => `- ${imp}`).join('\n') || '- *No improvements needed*'}
 
 ### Optimized Title Tag
 
 \`\`\`
-${seoAudit.optimizedTitleTag || ""}
+${seoAudit?.optimizedTitleTag || 'No optimized title available'}
 \`\`\`
 
-### Optimized Headings
+---
 
-${seoAudit.optimizedHeadings?.map((h: string) => `- ${h}`).join("\n") || ""}
+# Competitive Analysis
 
-### Recommended Schema Types
+${competitorChart ? `![Competitor Analysis](${competitorChart})` : ''}
 
-${seoAudit.recommendedSchemas?.map((s: string) => `- ${s}`).join("\n") || ""}
+## Your Top Competitors
 
-### Search Visibility Analysis
+| Business | Rating | Reviews | Threat Level |
+|----------|--------|---------|--------------|
+${competitors?.slice(0, 8).map((c: any) => `| ${c.name} | ${c.rating ? `⭐ ${c.rating}` : 'N/A'} | ${c.reviewCount || 0} | ${c.rating && c.rating >= 4.5 && c.reviewCount >= 100 ? '🔴 High' : c.rating && c.rating >= 4.0 ? '🟡 Medium' : '🟢 Low'} |`).join('\n') || '| *No competitors found* | - | - | - |'}
 
-${seoAudit.queries?.map((q: any) => `
-**Query:** "${q.query}"  
-- Organic Presence: ${q.organicPresence}  
-- Map Pack: ${q.mapPackPresence}  
-- Competitors Above: ${q.competitorsAbove}  
-- Data Type: ${q.dataType}
-`).join("\n") || ""}
+### Why Competitors Rank Higher
 
-${seoAudit.rankingData ? `
-### Real Search Ranking Data 🎯
+${competitiveAnalysis?.reasonsCompetitorsRank?.slice(0, 5).map((r: string) => `- ${r}`).join('\n') || '- *Analysis not available*'}
 
-**Average Position:** ${seoAudit.rankingData.averagePosition !== null ? `#${seoAudit.rankingData.averagePosition.toFixed(1)}` : 'Not ranking'}  
-**Local Pack Presence:** ${seoAudit.rankingData.inLocalPack ? '✓ Yes' : '✗ No'}  
-**Top Competitors:** ${seoAudit.rankingData.topCompetitors.length} identified
+### Trust & Authority Gaps
 
-#### Position by Query
+${competitiveAnalysis?.trustGaps?.slice(0, 5).map((g: string) => `- ${g}`).join('\n') || '- *No gaps identified*'}
 
-${seoAudit.rankingData.queries?.map((q: any) => `
-**"${q.query}"**  
-- Your Position: ${q.position ? `#${q.position}` : 'Not ranking'}  
-${q.competitors && q.competitors.length > 0 ? `- Top Competitors: ${q.competitors.map((c: any) => `#${c.position}: ${c.businessName}`).join(', ')}` : ''}
-`).join("\n") || ""}
+### Your Competitive Advantages
 
-### Visual Analytics
+${competitiveAnalysis?.competitorAdvantages?.slice(0, 5).map((a: string) => `- ✅ ${a}`).join('\n') || '- *No advantages identified*'}
 
-${visualUrls.filter(url => url.includes('ranking-comparison') || url.includes('heat-map')).map(url => `
-![Ranking Analysis](${url})
-`).join('\n') || ''}
+${heatMapChart ? `
+### Geographic Ranking Coverage
+
+![Geographic Heat Map](${heatMapChart})
 ` : ''}
 
 ---
 
-## 3. Competitive Analysis
+# AI Discoverability (AEO) Analysis
 
-### Why Competitors Rank Higher
+## AEO Score: ${aeoAnalysis?.score || 0}/100 ${getScoreEmoji(aeoAnalysis?.score || 0)}
 
-${competitiveAnalysis.reasonsCompetitorsRank?.map((r: string) => `- ${r}`).join("\n") || ""}
-
-### Trust & Authority Gaps
-
-${competitiveAnalysis.trustGaps?.map((g: string) => `- ${g}`).join("\n") || ""}
-
-### Competitor Advantages
-
-${competitiveAnalysis.competitorAdvantages?.map((a: string) => `- ${a}`).join("\n") || ""}
-
----
-
-## 4. AI Discoverability (AEO) Analysis
-
-**AI Discoverability Score:** ${aeoAnalysis.score}/100
+${aeoScoreChart ? `![AEO Score](${aeoScoreChart})` : ''}
 
 ### Why AI Would Recommend You
 
-${aeoAnalysis.whyAIWouldRecommend || ""}
+${aeoAnalysis?.whyAIWouldRecommend || '*Analysis not available*'}
 
-### Why AI Might Not Recommend You
+### Why AI Might NOT Recommend You
 
-${aeoAnalysis.whyAIWouldNot || ""}
+${aeoAnalysis?.whyAIWouldNot || '*Analysis not available*'}
 
 ### Fixes to Improve AI Visibility
 
-${aeoAnalysis.fixes?.map((f: string) => `- ${f}`).join("\n") || ""}
-
-### Example FAQ Content
-
-${aeoAnalysis.exampleFAQ || ""}
-
-### Optimized About Us
-
-${aeoAnalysis.optimizedAboutUs || ""}
+| Priority | Fix | Impact |
+|----------|-----|--------|
+${aeoAnalysis?.fixes?.slice(0, 6).map((f: string, i: number) => `| ${i < 2 ? '🔴 HIGH' : i < 4 ? '🟡 MEDIUM' : '🟢 LOW'} | ${f} | ${i < 2 ? 'Critical' : i < 4 ? 'Important' : 'Helpful'} |`).join('\n') || '| - | *No fixes needed* | - |'}
 
 ---
 
-## 5. Lead Capture & Response Analysis
+# Lead Capture & Response Analysis
 
-### Current Lead Channels
+## Current Lead Channels
 
-${leadCaptureAnalysis.channels?.map((ch: any) => `
-**${ch.channel}**  
-- Visibility: ${ch.visibility}  
-- Response Expectation: ${ch.responseExpectation}  
-- After-Hours Coverage: ${ch.afterHoursCoverage}  
-- Risk Level: ${ch.riskLevel}  
-- Data Type: ${ch.dataType}
-`).join("\n") || ""}
+| Channel | Visibility | Response Time | After-Hours | Risk |
+|---------|------------|---------------|-------------|------|
+${leadCaptureAnalysis?.channels?.slice(0, 5).map((ch: any) => `| ${ch.channel} | ${ch.visibility} | ${ch.responseExpectation} | ${ch.afterHoursCoverage} | ${ch.riskLevel === 'High' ? '🔴' : ch.riskLevel === 'Medium' ? '🟡' : '🟢'} ${ch.riskLevel} |`).join('\n') || '| *No channels analyzed* | - | - | - | - |'}
 
 ### AI Voice Opportunities
 
-${leadCaptureAnalysis.aiVoiceOpportunities?.map((o: string) => `- ${o}`).join("\n") || ""}
+${leadCaptureAnalysis?.aiVoiceOpportunities?.slice(0, 4).map((o: string) => `- 🤖 ${o}`).join('\n') || '- *No opportunities identified*'}
 
 ### Conversation AI Opportunities
 
-${leadCaptureAnalysis.conversationAIOpportunities?.map((o: string) => `- ${o}`).join("\n") || ""}
+${leadCaptureAnalysis?.conversationAIOpportunities?.slice(0, 4).map((o: string) => `- 💬 ${o}`).join('\n') || '- *No opportunities identified*'}
 
 ---
 
-## 6. Follow-Up & Nurture Systems
+# Revenue Recapture Summary
 
-### Current State
+${revenueRecapture?.estimatedMonthlyRecovery ? `
+## 💰 Estimated Monthly Revenue Recovery: $${revenueRecapture.estimatedMonthlyRecovery.toLocaleString()}
 
-${followUpAnalysis.currentState || ""}
+*Based on your current gaps and industry benchmarks*
+` : ''}
 
-### Opportunity State
+## Revenue Opportunity Breakdown
 
-${followUpAnalysis.opportunityState || ""}
-
-### Automation Opportunities
-
-${followUpAnalysis.automationOpportunities?.map((o: string) => `- ${o}`).join("\n") || ""}
-
-### Reactivation Potential
-
-${followUpAnalysis.reactivationPotential || ""}
+| Area | Key Issue | Impact | Revenue Upside |
+|------|-----------|--------|----------------|
+${revenueRecapture?.opportunities?.slice(0, 5).map((opp: any) => `| ${opp.area} | ${opp.keyIssue} | ${opp.impactLevel === 'High' ? '🔴' : opp.impactLevel === 'Medium' ? '🟡' : '🟢'} ${opp.impactLevel} | ${opp.revenueUpside} |`).join('\n') || '| *No opportunities identified* | - | - | - |'}
 
 ---
 
-## 7. Revenue Recapture Summary
+# Recommended Implementation Plan
 
-${revenueRecapture.estimatedMonthlyRecovery ? `**Estimated Monthly Revenue Recovery:** $${revenueRecapture.estimatedMonthlyRecovery.toLocaleString()}` : ""}
+${recommendedPlan?.planName ? `## ${recommendedPlan.planName}` : ''}
 
-### Revenue Opportunity Visualization
+## Implementation Pillars
 
-${visualUrls.filter(url => url.includes('revenue-opportunity') || url.includes('funnel')).map(url => `
-![Revenue Analysis](${url})
-`).join('\n') || ''}
+${recommendedPlan?.pillars?.slice(0, 4).map((p: any) => `
+### ${p.pillarName || p.title || 'Pillar'}
 
-### Opportunities
+${p.tactics?.map((t: string) => `- ${t}`).join('\n') || p.description || '*No tactics defined*'}
+`).join('\n') || '*No pillars defined*'}
 
-${revenueRecapture.opportunities?.map((opp: any) => `
-**${opp.area}**  
-- Key Issue: ${opp.keyIssue}  
-- Impact Level: ${opp.impactLevel}  
-- Data Type: ${opp.dataType}  
-- Revenue Upside: ${opp.revenueUpside}
-`).join("\n") || ""}
+## Implementation Roadmap
 
----
-
-## 8. Recommended Plan: ${recommendedPlan.planName || ""}
-
-### Implementation Pillars
-
-${recommendedPlan.pillars?.map((p: any) => `
-#### ${p.pillarName}
-
-${p.tactics?.map((t: string) => `- ${t}`).join("\n") || ""}
-`).join("\n") || ""}
-
-### Implementation Roadmap
-
-${Array.isArray(recommendedPlan.roadmap) ? recommendedPlan.roadmap.map((phase: any) => `
-#### ${phase.phaseName} (${phase.timeline})
+${Array.isArray(recommendedPlan?.roadmap) ? recommendedPlan.roadmap.slice(0, 3).map((phase: any) => `
+### ${phase.phaseName || phase.title || 'Phase'} ${phase.timeline ? `(${phase.timeline})` : ''}
 
 **Focus Areas:**
-${phase.focusAreas?.map((f: string) => `- ${f}`).join("\n") || ""}
+${phase.focusAreas?.map((f: string) => `- ${f}`).join('\n') || phase.items?.map((i: string) => `- ${i}`).join('\n') || '- *Not specified*'}
 
 **Expected Outcomes:**
-${phase.expectedOutcomes?.map((o: string) => `- ${o}`).join("\n") || ""}
-`).join("\n") : ""}
-
-### Investment Packages
-
-${recommendedPlan.pricingPackages?.map((pkg: any) => `
-#### ${pkg.packageName}
-
-**Best For:** ${pkg.bestFor}
-
-**What's Included:**
-${pkg.includes?.map((i: string) => `- ${i}`).join("\n") || ""}
-
-**Investment Range:** ${pkg.investmentRange}
-`).join("\n") || ""}
+${phase.expectedOutcomes?.map((o: string) => `- ${o}`).join('\n') || '- *To be determined*'}
+`).join('\n') : '*No roadmap defined*'}
 
 ---
 
-## Next Steps
+# Next Steps
 
-Ready to recapture lost revenue and dominate your local market?
+## Ready to Dominate Your Local Market?
+
+Let's turn these insights into revenue for **${businessName}**
 
 ### Your Action Plan
 
@@ -433,24 +401,20 @@ Ready to recapture lost revenue and dominate your local market?
 
 ---
 
-<div style="page-break-after: always;"></div>
+## Schedule Your Strategy Call
 
-<div style="text-align: center; margin-top: 80px; padding: 50px;">
-  <h2 style="color: #FF6B5B; font-size: 32px; margin-bottom: 20px;">Let's Turn These Insights Into Revenue</h2>
-  <p style="font-size: 18px; color: #444; margin-bottom: 40px;">Schedule your free strategy call and get a custom implementation plan for ${businessName}</p>
+Get a custom implementation plan tailored to your business
 
-  <div style="margin: 30px auto; padding: 20px; border: 2px solid #2DD4BF; border-radius: 12px; max-width: 400px;">
-    <p style="font-size: 16px; font-weight: bold; color: #2DD4BF; margin-bottom: 10px;">Book Your Strategy Call</p>
-    <p style="font-size: 14px; color: #666;">eighty5labs.com/schedule</p>
-  </div>
+**📞 eighty5labs.com/schedule**
 
-  <div style="margin-top: 60px; border-top: 3px solid #FF6B5B; padding-top: 30px;">
-    <p style="font-size: 20px; font-weight: bold; color: #FF6B5B;">eighty5labs</p>
-    <p style="font-size: 14px; color: #666; margin-top: 8px;">Agentic Marketing Infrastructure</p>
-    <p style="font-size: 12px; color: #999; margin-top: 4px;">Your marketing runs itself. Your revenue doesn't sleep.</p>
-    <p style="font-size: 11px; color: #bbb; margin-top: 20px;">This report was generated by Local Authority Snapshot, a product of eighty5labs.</p>
-    <p style="font-size: 11px; color: #bbb;">Report ID: ${input.auditId} | Generated: ${new Date().toISOString()}</p>
-  </div>
-</div>
+---
+
+*This report was generated on ${today} by eighty5labs Local Authority Snapshot*
+
+**eighty5labs** | Agentic Marketing Infrastructure
+
+*Your marketing runs itself. Your revenue doesn't sleep.*
+
+© ${new Date().getFullYear()} eighty5labs. All rights reserved.
 `;
 }

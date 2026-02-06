@@ -541,6 +541,14 @@ Return ONLY valid JSON in this exact format:
   result.trustGaps = [...analysis.gaps.slice(0, 3), ...result.trustGaps].slice(0, 5);
   result.competitorAdvantages = [...analysis.advantages.slice(0, 2), ...result.competitorAdvantages].slice(0, 5);
   
+  // Include competitor list for PDF generation
+  result.competitors = competitorData.competitors.slice(0, 10).map(c => ({
+    name: c.name,
+    rating: c.rating || null,
+    reviewCount: c.reviewCount || null,
+  }));
+  result.yourPosition = competitorData.yourPosition;
+  
   return result;
 }
 

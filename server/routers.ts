@@ -51,11 +51,34 @@ export const appRouter = router({
         const aeoAnalysis = safeJsonParse(audit.aeoResults);
         const leadCaptureAnalysis = safeJsonParse(audit.leadCaptureResults);
         const followUpAnalysis = safeJsonParse(audit.followUpResults);
-        const executiveSummary = safeJsonParse(audit.executiveSummary);
+        const keyFindings = safeJsonParse(audit.keyFindings, []);
         const recommendations = safeJsonParse(audit.recommendations);
         
         // Get visual URLs from audit_visuals table
         const visualUrls = (audit as any).visuals?.map((v: any) => v.imageUrl) || [];
+
+        // Extract competitor data from competitive analysis
+        const competitors = competitiveAnalysis?.competitors || [];
+        
+        // Calculate overall grade and score
+        const gbpScore = gbpAudit?.score || 0;
+        const seoScore = seoAudit?.score || 0;
+        const aeoScore = aeoAnalysis?.score || 0;
+        const overallScore = Math.round((gbpScore + seoScore + aeoScore) / 3);
+        const overallGrade = overallScore >= 90 ? 'A' : overallScore >= 80 ? 'B' : overallScore >= 70 ? 'C' : overallScore >= 60 ? 'D' : 'F';
+
+        // Generate priority actions from the audit data
+        const priorityActions: string[] = [];
+        if (gbpAudit?.improvements) priorityActions.push(...gbpAudit.improvements.slice(0, 2));
+        if (seoAudit?.improvements) priorityActions.push(...seoAudit.improvements.slice(0, 2));
+        if (aeoAnalysis?.fixes) priorityActions.push(...aeoAnalysis.fixes.slice(0, 2));
+        
+        // Build structured executive summary
+        const executiveSummary = {
+          summary: audit.executiveSummary || '',
+          keyFindings: Array.isArray(keyFindings) ? keyFindings : [],
+          priorityActions: priorityActions.slice(0, 6)
+        };
 
         // Generate PDF
         const pdfUrl = await generatePDF({
@@ -73,6 +96,9 @@ export const appRouter = router({
           revenueRecapture: recommendations.revenueRecapture || {},
           recommendedPlan: recommendations.recommendedPlan || {},
           visualUrls,
+          competitors,
+          overallGrade,
+          overallScore,
         });
 
         // Update audit with PDF URL
@@ -350,9 +376,22 @@ export const appRouter = router({
             const aeoAnalysis = safeJsonParse(audit.aeoResults);
             const leadCaptureAnalysis = safeJsonParse(audit.leadCaptureResults);
             const followUpAnalysis = safeJsonParse(audit.followUpResults);
-            const executiveSummary = safeJsonParse(audit.executiveSummary);
+            const keyFindings = safeJsonParse(audit.keyFindings) || [];
             const recommendations = safeJsonParse(audit.recommendations);
             const visualUrls = (audit as any).visuals?.map((v: any) => v.imageUrl) || [];
+            
+            // Generate priority actions from the audit data
+            const priorityActions: string[] = [];
+            if (gbpAudit?.improvements) priorityActions.push(...gbpAudit.improvements.slice(0, 2));
+            if (seoAudit?.improvements) priorityActions.push(...seoAudit.improvements.slice(0, 2));
+            if (aeoAnalysis?.fixes) priorityActions.push(...aeoAnalysis.fixes.slice(0, 2));
+            
+            // Build structured executive summary
+            const executiveSummary = {
+              summary: audit.executiveSummary || '',
+              keyFindings: keyFindings,
+              priorityActions: priorityActions.slice(0, 6)
+            };
             
             pdfUrl = await generatePDF({
               auditId: audit.id,

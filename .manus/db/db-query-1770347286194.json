@@ -1,0 +1,14 @@
+{
+  "query": "SELECT id, executiveSummary FROM audits WHERE id = 270001 LIMIT 1",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user gvHM7L26eFEKLxd.root --database hmgSMMSSNJCN2iZZwVjazU --execute SELECT id, executiveSummary FROM audits WHERE id = 270001 LIMIT 1",
+  "rows": [
+    {
+      "id": "270001",
+      "executiveSummary": "The Lindley Team, a mortgage lender based in Portland, Oregon, demonstrates strong foundational online visibility, particularly with a perfect 100/100 score in Website Local SEO. While Google Business Profile (GBP) optimization is solid at 80/100, there's a notable opportunity to enhance AI Discoverability, currently at 68/100. Addressing this gap will be crucial for increasing lead generation and improving overall online presence in a competitive market."
+    }
+  ],
+  "messages": [],
+  "stdout": "id\texecutiveSummary\n270001\tThe Lindley Team, a mortgage lender based in Portland, Oregon, demonstrates strong foundational online visibility, particularly with a perfect 100/100 score in Website Local SEO. While Google Business Profile (GBP) optimization is solid at 80/100, there's a notable opportunity to enhance AI Discoverability, currently at 68/100. Addressing this gap will be crucial for increasing lead generation and improving overall online presence in a competitive market.\n",
+  "stderr": "",
+  "execution_time_ms": 49
+}
