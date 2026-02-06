@@ -82,6 +82,12 @@ export const audits = mysqlTable("audits", {
   // Deep competitor analysis (stored as JSON)
   deepCompetitorAnalysis: text("deepCompetitorAnalysis"),
 
+  // Lead contact information (for report gating)
+  leadName: varchar("leadName", { length: 255 }),
+  leadEmail: varchar("leadEmail", { length: 320 }),
+  leadPhone: varchar("leadPhone", { length: 50 }),
+  leadCapturedAt: timestamp("leadCapturedAt"),
+
   // Go High Level integration
   ghlContactId: varchar("ghlContactId", { length: 100 }),
   ghlWorkflowTriggered: int("ghlWorkflowTriggered").default(0),

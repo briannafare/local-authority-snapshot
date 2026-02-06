@@ -301,6 +301,98 @@ export const appRouter = router({
         return await getAllAudits();
       }),
 
+    // Capture lead info and unlock full report
+    captureLead: publicProcedure
+      .input(
+        z.object({
+          auditId: z.number(),
+          name: z.string().min(1, "Name is required"),
+          email: z.string().email("Valid email is required"),
+          phone: z.string().min(10, "Valid phone number is required"),
+        })
+      )
+      .mutation(async ({ input }) => {
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+        
+        const { getAuditById } = await import("./db");
+        const { sendAuditReportEmail } = await import("./emailService");
+        const { generatePDF } = await import("./pdfGenerator");
+        
+        const audit = await getAuditById(input.auditId);
+        if (!audit) throw new Error("Audit not found");
+        
+        // Update audit with lead info and unlock full report
+        await db
+          .update(audits)
+          .set({
+            leadName: input.name,
+            leadEmail: input.email,
+            leadPhone: input.phone,
+            leadCapturedAt: new Date(),
+            fullReportUnlocked: 1,
+            emailSent: input.email,
+          })
+          .where(eq(audits.id, input.auditId));
+        
+        // Generate PDF if not already generated
+        let pdfUrl = audit.pdfUrl;
+        if (!pdfUrl) {
+          try {
+            const safeJsonParse = (str: string | null, fallback: any = {}) => {
+              if (!str) return fallback;
+              try { return JSON.parse(str); } catch { return fallback; }
+            };
+            
+            const gbpAudit = safeJsonParse(audit.gbpAuditResults);
+            const seoAudit = safeJsonParse(audit.seoAuditResults);
+            const competitiveAnalysis = safeJsonParse(audit.competitiveResults);
+            const aeoAnalysis = safeJsonParse(audit.aeoResults);
+            const leadCaptureAnalysis = safeJsonParse(audit.leadCaptureResults);
+            const followUpAnalysis = safeJsonParse(audit.followUpResults);
+            const executiveSummary = safeJsonParse(audit.executiveSummary);
+            const recommendations = safeJsonParse(audit.recommendations);
+            const visualUrls = (audit as any).visuals?.map((v: any) => v.imageUrl) || [];
+            
+            pdfUrl = await generatePDF({
+              auditId: audit.id,
+              businessName: audit.businessName,
+              primaryLocation: audit.primaryLocation,
+              primaryNiche: audit.primaryNiche,
+              executiveSummary,
+              gbpAudit,
+              seoAudit,
+              competitiveAnalysis,
+              aeoAnalysis,
+              leadCaptureAnalysis,
+              followUpAnalysis,
+              revenueRecapture: recommendations.revenueRecapture || {},
+              recommendedPlan: recommendations.recommendedPlan || {},
+              visualUrls,
+            });
+            
+            await db
+              .update(audits)
+              .set({ pdfUrl })
+              .where(eq(audits.id, input.auditId));
+          } catch (pdfError) {
+            console.error("[Lead Capture] PDF generation failed:", pdfError);
+          }
+        }
+        
+        // Send email with PDF
+        if (pdfUrl) {
+          try {
+            await sendAuditReportEmail(input.email, audit.businessName, pdfUrl);
+            console.log(`[Lead Capture] Report sent to ${input.email}`);
+          } catch (emailError) {
+            console.error("[Lead Capture] Email send failed:", emailError);
+          }
+        }
+        
+        return { success: true, pdfUrl };
+      }),
+
     sendEmail: publicProcedure
       .input(
         z.object({

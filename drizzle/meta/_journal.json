@@ -36,6 +36,13 @@
       "when": 1770171599381,
       "tag": "0004_lumpy_bedlam",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "5",
+      "when": 1770345362040,
+      "tag": "0005_thin_sauron",
+      "breakpoints": true
     }
   ]
 }

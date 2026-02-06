@@ -1,0 +1,40 @@
+{
+  "query": "SELECT id, businessName, status, fullReportUnlocked FROM audits WHERE status = 'completed' ORDER BY id DESC LIMIT 5",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user gvHM7L26eFEKLxd.root --database hmgSMMSSNJCN2iZZwVjazU --execute SELECT id, businessName, status, fullReportUnlocked FROM audits WHERE status = 'completed' ORDER BY id DESC LIMIT 5",
+  "rows": [
+    {
+      "id": "240007",
+      "businessName": "The Lindley Team",
+      "status": "completed",
+      "fullReportUnlocked": "0"
+    },
+    {
+      "id": "240006",
+      "businessName": "The Lindley Team",
+      "status": "completed",
+      "fullReportUnlocked": "0"
+    },
+    {
+      "id": "240005",
+      "businessName": "The Lindley Team",
+      "status": "completed",
+      "fullReportUnlocked": "0"
+    },
+    {
+      "id": "240004",
+      "businessName": "The Lindley Team",
+      "status": "completed",
+      "fullReportUnlocked": "0"
+    },
+    {
+      "id": "240003",
+      "businessName": "The Lindley Team",
+      "status": "completed",
+      "fullReportUnlocked": "0"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tbusinessName\tstatus\tfullReportUnlocked\n240007\tThe Lindley Team\tcompleted\t0\n240006\tThe Lindley Team\tcompleted\t0\n240005\tThe Lindley Team\tcompleted\t0\n240004\tThe Lindley Team\tcompleted\t0\n240003\tThe Lindley Team\tcompleted\t0\n",
+  "stderr": "",
+  "execution_time_ms": 51
+}

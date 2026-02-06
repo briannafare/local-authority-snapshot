@@ -555,3 +555,20 @@
 - [x] Fix null/undefined error handling in auditEngine.ts
 - [x] Add try-catch blocks to visualGenerator.ts for ranking data
 - [x] Remove broken Vercel configuration files (api/ folder and vercel.json)
+
+
+## Lead Capture & Report Delivery - Feb 5, 2026
+- [ ] Add lead capture form (name, email, phone) before showing full report
+- [ ] Implement email delivery of PDF report after form submission
+- [ ] Add sales bypass mode (URL parameter or login) to skip lead wall
+- [ ] Add PDF download button on report page
+- [ ] Fix report page to show actual data (not empty)
+
+
+## Lead Capture & Report Delivery - Feb 5, 2026 (COMPLETED)
+- [x] Add lead capture form with name, email, phone fields (LeadCaptureForm.tsx)
+- [x] Implement email delivery of PDF report (captureLead procedure)
+- [x] Add sales bypass mode (?sales=true or logged in users)
+- [x] Add PDF download button to report page (Download PDF button in header and footer)
+- [x] Update TeaserReport with clearer unlock CTA
+- [x] Add database fields for lead info (leadName, leadEmail, leadPhone, leadCapturedAt)

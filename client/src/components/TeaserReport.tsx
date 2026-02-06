@@ -208,14 +208,14 @@ export function TeaserReport({
       {/* CTA */}
       <Card className="border-0 shadow-xl bg-gradient-to-br from-[#FF6B5B] to-[#E55A4A] text-white">
         <CardContent className="py-10 text-center">
-          <Mail className="w-12 h-12 mx-auto mb-4 opacity-90" />
+          <Lock className="w-12 h-12 mx-auto mb-4 opacity-90" />
           <h3 className="text-2xl font-bold mb-3">
-            {emailSent ? 'Check Your Inbox!' : 'Get Your Full Report'}
+            {emailSent ? 'Check Your Inbox!' : 'Unlock Your Full Report'}
           </h3>
           <p className="text-lg mb-6 opacity-90 max-w-md mx-auto">
             {emailSent
               ? 'Your complete Local Authority Snapshot has been sent to your email with the full GeoGrid, competitor analysis, and action plan.'
-              : 'Unlock the complete analysis including GeoGrid heatmap, competitor breakdown, and customized action plan.'}
+              : 'Enter your contact details to unlock the complete analysis including GeoGrid heatmap, competitor breakdown, customized action plan, and downloadable PDF.'}
           </p>
           <Button
             size="lg"
@@ -223,8 +223,13 @@ export function TeaserReport({
             className="bg-white text-[#FF6B5B] hover:bg-gray-100 text-lg px-8"
             onClick={onRequestFullReport}
           >
-            {emailSent ? 'View Full Report' : 'Send Full Report to My Email'}
+            {emailSent ? 'View Full Report' : 'Unlock Full Report Now'}
           </Button>
+          {!emailSent && (
+            <p className="text-sm mt-4 opacity-80">
+              Your report will also be emailed to you instantly
+            </p>
+          )}
         </CardContent>
       </Card>
     </div>
