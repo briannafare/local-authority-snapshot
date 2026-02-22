@@ -7,6 +7,9 @@ dist/
 build/
 *.dist
 
+# Generated Vercel function bundle (built at deploy time)
+api/trpc/handler.mjs
+
 # Environment variables
 .env
 .env.local
