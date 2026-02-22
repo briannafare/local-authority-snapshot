@@ -3,11 +3,6 @@
   "buildCommand": "npx vite build && npx esbuild server/vercel-trpc.ts --bundle --platform=node --format=esm --packages=external --outfile=api/trpc/handler.mjs",
   "outputDirectory": "dist/public",
   "framework": null,
-  "functions": {
-    "api/trpc/handler.mjs": {
-      "maxDuration": 60
-    }
-  },
   "rewrites": [
     {
       "source": "/api/trpc/:path*",
